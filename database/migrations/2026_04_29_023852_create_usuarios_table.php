@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('persona_id')
+                ->constrained('personas')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+            $table->foreignId('rol_id')
+                ->constrained('roles')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+            $table->string('password_hash', 255);
+            $table->dateTime('ultimo_acceso');
+            $table->enum('estado', ['activo', 'inactivo', 'bloqueado'])->default('activo');
             $table->timestamps();
         });
     }
