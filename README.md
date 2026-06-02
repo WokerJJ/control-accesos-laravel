@@ -19,9 +19,6 @@
 - [Exportaciones y Reportes](#-exportaciones-y-reportes)
 - [Panel de Administracion](#-panel-de-administracion)
 - [Modelo de Datos](#-modelo-de-datos)
-- [Licencia](#-licencia)
-- [Contribuir](#-contribuir)
-- [Contacto](#-contacto)
 
 ---
 
@@ -341,32 +338,6 @@ INICIO >> IDENTIFICAR >> ACTIVIDAD >> CASILLERO >> CONFIRMAR >> SALIDA >> CALIFI
 5. **Ingreso**: Se registra la entrada con hora y estado `en_curso`.
 6. **Salida**: Al finalizar, se registra la salida con duración calculada.
 7. **Calificación**: La persona evalúa el servicio del 1 al 5.
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia **MIT** – ver el archivo `LICENSE` para más detalles.
-
----
-
-## 🤝 Contribuir
-
-1. **Fork** el repositorio.
-2. Crea una rama para tu característica o corrección (`git checkout -b feature/nueva-funcionalidad`).
-3. Ejecuta `composer install` y `npm install`.
-4. Asegúrate de que las pruebas pasen (`php artisan test`).
-5. Envía un **Pull Request**.
-
-> **Reglas de estilo**: usa Laravel Pint (`composer exec pint`) y mantén el código formateado según PSR‑12.
-
----
-
-## 📞 Contacto
-
-- **Autor**: Tu Nombre – [Correo](mailto:tu@email.com)
-- **Repositorio**: https://github.com/tu-usuario/control-accesos
-- **Issues**: Abre un *issue* para dudas o mejoras.
 
 ---
 
