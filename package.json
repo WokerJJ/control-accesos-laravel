@@ -4,7 +4,12 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "copy-adminlte": "xcopy node_modules\\admin-lte\\dist public\\adminlte\\dist /E /I /Y",
+        "copy-jquery": "xcopy node_modules\\jquery\\dist public\\adminlte\\plugins\\jquery /E /I /Y",
+        "copy-bootstrap": "xcopy node_modules\\bootstrap\\dist public\\adminlte\\plugins\\bootstrap /E /I /Y",
+        "copy-fa": "xcopy node_modules\\@fortawesome\\fontawesome-free public\\adminlte\\plugins\\fontawesome-free /E /I /Y",
+        "setup-adminlte": "npm run copy-adminlte && npm run copy-jquery && npm run copy-bootstrap && npm run copy-fa"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
@@ -14,6 +19,16 @@
         "vite": "^8.0.0"
     },
     "dependencies": {
-        "admin-lte": "^4.0.0-rc7"
+        "@fortawesome/fontawesome-free": "^7.2.0",
+        "@fullcalendar/bootstrap5": "^6.1.20",
+        "@fullcalendar/core": "^6.1.20",
+        "@fullcalendar/daygrid": "^6.1.20",
+        "@fullcalendar/interaction": "^6.1.20",
+        "@fullcalendar/list": "^6.1.20",
+        "@fullcalendar/timegrid": "^6.1.20",
+        "admin-lte": "^4.0.0-rc7",
+        "bootstrap": "^5.3.8",
+        "chart.js": "^4.5.1",
+        "jquery": "^4.0.0"
     }
 }

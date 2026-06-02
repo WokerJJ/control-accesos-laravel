@@ -24,3 +24,11 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.env.*
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+npm-debug.log
+yarn-error.log

@@ -13,13 +13,19 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run()
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            TipoIdentificacionSeeder::class,
+            RolesSeeder::class,
+            DepartamentoSeeder::class,
+            MunicipioSeeder::class,
+            LocacionSeeder::class,
+            TipoActividadSeeder::class,
+            ActividadesSeeder::class,
+            UsuarioSeeder::class,
+            CasilleroSeeder::class,
+            AccesoSeeder::class,
         ]);
     }
 }

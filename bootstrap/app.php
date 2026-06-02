@@ -10,8 +10,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function ($middleware) {
+        $middleware->alias([
+            'auth.dashboard' => \App\Http\Middleware\AuthDashboard::class,
+            'rol' => \App\Http\Middleware\RolMiddleware::class,
+        ]);
+        $middleware->append(
+            \App\Http\Middleware\VerificarCierreDiario::class
+        );
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
