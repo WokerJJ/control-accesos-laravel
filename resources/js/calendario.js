@@ -21,14 +21,21 @@ const ROUTE_CREATE = window.routeCrear
 const ROUTE_UPDATE = window.routeActualizar
 const ROUTE_DELETE = window.routeEliminar
 
+let calendarInstance = null
+
 // ═══════════════════════════════════════════════
-// Bootstrap
+// Bootstrap (Turbo-compatible)
 // ═══════════════════════════════════════════════
 
-document.addEventListener('DOMContentLoaded', () => {
+function initCalendar() {
+    // Destruir instancia anterior si existe (al navegar con Turbo)
+    if (calendarInstance) {
+        calendarInstance.destroy()
+        calendarInstance = null
+    }
 
     // ── Referencias DOM ───────────────────────────
-    const calendarEl    = document.getElementById('calendar')
+    const calendarEl = document.getElementById('calendar')
     if (!calendarEl) {
         return  // ← Sale silenciosamente si no hay calendario
     }
@@ -239,7 +246,15 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     })
 
-    calendar.render()
+    try {
+        calendar.render()
+    } finally {
+        calendarInstance = calendar
+        // Ocultar spinner y mostrar calendario
+        const loadingEl = document.getElementById('calendar-loading')
+        if (loadingEl) loadingEl.remove()
+        calendarEl.style.display = ''
+    }
 
     let resizeTimer = null
     window.addEventListener('resize', () => {
@@ -250,4 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
             calendar.setOption('headerToolbar', getToolbar())
         }, 200)
     })
-})
+}
+
+// Soporte para Turbo: init en DOMContentLoaded Y en turbo:load
+document.addEventListener('DOMContentLoaded', initCalendar)
+document.addEventListener('turbo:load', initCalendar)

@@ -51,10 +51,8 @@ class ExportController extends Controller
                 'locacion:id,nombre',
                 'actividad:id,nombre',
             ])
-            ->whereBetween('hora_ingreso', [
-                $params['desde'] . ' 00:00:00',
-                $params['hasta'] . ' 23:59:59',
-            ])
+            ->where('hora_ingreso', '>=', $params['desde'] . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $params['hasta'] . ' 23:59:59')
             ->when(
                 $params['locacionId'],
                 fn($q) => $q->where('locacion_id', $params['locacionId'])

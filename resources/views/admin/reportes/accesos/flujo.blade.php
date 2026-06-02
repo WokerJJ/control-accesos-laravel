@@ -69,6 +69,45 @@
             color="text-bg-success"/>
     </div>
 
+    @php
+    $chartFlujo = [
+        'type' => 'bar',
+        'data' => [
+            'labels' => $flujo['labels'],
+            'datasets' => [
+                [
+                    'label' => 'Ingresos',
+                    'data' => $flujo['ingresos'],
+                    'backgroundColor' => 'rgba(0,123,255,0.75)',
+                    'borderColor' => '#007bff',
+                    'borderWidth' => 1,
+                    'borderRadius' => 4,
+                    'order' => 1,
+                ],
+                [
+                    'label' => 'Salidas',
+                    'data' => $flujo['salidas'],
+                    'backgroundColor' => 'rgba(108,117,125,0.6)',
+                    'borderColor' => '#6c757d',
+                    'borderWidth' => 1,
+                    'borderRadius' => 4,
+                    'order' => 2,
+                ],
+            ],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'interaction' => ['mode' => 'index', 'intersect' => false],
+            'plugins' => ['legend' => ['position' => 'top']],
+            'scales' => [
+                'y' => ['beginAtZero' => true, 'ticks' => ['stepSize' => 1]],
+                'x' => ['ticks' => ['maxRotation' => 45]],
+            ],
+        ],
+    ];
+    @endphp
+
     {{-- ── Gráfica principal ────────────────────────── --}}
     <div class="row g-3 mb-4">
         <div class="col-12">
@@ -76,7 +115,7 @@
                 title="Ingresos vs Salidas por hora"
                 icon="fas fa-stream"
                 :height="320">
-                <canvas id="chartFlujo"></canvas>
+                <canvas id="chartFlujo" data-chart-config='{!! json_encode($chartFlujo, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
     </div>
@@ -192,65 +231,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var flujo = {!! json_encode($flujo, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-
-        new Chart(document.getElementById('chartFlujo'), {
-            type: 'bar',
-            data: {
-                labels: flujo.labels,
-                datasets: [
-                    {
-                        label: 'Ingresos',
-                        data: flujo.ingresos,
-                        backgroundColor: 'rgba(0,123,255,0.75)',
-                        borderColor: '#007bff',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        order: 1,
-                    },
-                    {
-                        label: 'Salidas',
-                        data: flujo.salidas,
-                        backgroundColor: 'rgba(108,117,125,0.6)',
-                        borderColor: '#6c757d',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        order: 2,
-                    },
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                        callbacks: {
-                            footer: function (items) {
-                                var ing = items.find(function(i) { return i.dataset.label === 'Ingresos'; });
-                                var sal = items.find(function(i) { return i.dataset.label === 'Salidas'; });
-                                if (ing && sal) {
-                                    var diff = ing.parsed.y - sal.parsed.y;
-                                    return 'En local: ' + (diff > 0 ? '+' : '') + diff;
-                                }
-                                return '';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                    x: { ticks: { maxRotation: 45 } }
-                }
-            }
-        });
-
-    });
-</script>
-@endpush

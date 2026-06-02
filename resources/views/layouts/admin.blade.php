@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="/adminlte/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/adminlte/dist/css/adminlte.min.css">
-    @stack('styles')
+        @stack('styles')
 </head>
 
 <body class="layout-fixed sidebar-expand-lg sidebar-mini">
@@ -41,7 +41,9 @@
         <div class="app-content">
             <div class="container-fluid">
                 <x-alerta></x-alerta>
+                <turbo-frame id="main" style="display: contents;">
                 @yield('content')
+            </turbo-frame>
             </div>
         </div>
 

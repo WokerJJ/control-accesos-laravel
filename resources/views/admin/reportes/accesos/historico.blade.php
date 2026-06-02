@@ -64,7 +64,8 @@
                     <label>Buscar persona</label>
                     <input type="text" name="buscar" class="form-control"
                            placeholder="Nombre o documento"
-                           value="{{ $buscar }}">
+                           value="{{ $buscar }}"
+                           maxlength="100">
                 </div>
             </div>
 
@@ -95,6 +96,35 @@
             color="text-bg-info"/>
     </div>
 
+    @php
+    $chartTendencia = [
+        'type' => 'line',
+        'data' => [
+            'labels' => $grafica['labels'],
+            'datasets' => [[
+                'label' => 'Ingresos',
+                'data' => $grafica['data'],
+                'borderColor' => '#007bff',
+                'backgroundColor' => 'rgba(0,123,255,0.1)',
+                'borderWidth' => 2,
+                'pointBackgroundColor' => '#007bff',
+                'pointRadius' => 4,
+                'fill' => true,
+                'tension' => 0.3,
+            ]],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['display' => false]],
+            'scales' => [
+                'y' => ['beginAtZero' => true, 'ticks' => ['stepSize' => 1]],
+                'x' => ['ticks' => ['maxRotation' => 45, 'autoSkip' => true, 'maxTicksLimit' => 20]],
+            ],
+        ],
+    ];
+    @endphp
+
     {{-- ── Gráfica tendencia ───────────────────────── --}}
     <div class="row g-3 mb-4">
         <div class="col-12">
@@ -102,7 +132,7 @@
                 title="Ingresos por día"
                 icon="fas fa-chart-line"
                 :height="260">
-                <canvas id="chartTendencia"></canvas>
+                <canvas id="chartTendencia" data-chart-config='{!! json_encode($chartTendencia, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
     </div>
@@ -116,12 +146,12 @@
             </h3>
             <div class="d-flex justify-content-end gap-1">
                 <a href="{{ route('admin.reportes.export.historico.csv', request()->query()) }}"
-                   class="btn btn-sm btn-success">
-                    <i class="fas fa-file-excel mr-1"></i>Excel
+                   class="btn btn-sm btn-success export-btn" data-turbo="false">
+                    <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                 </a>
                 <a href="{{ route('admin.reportes.export.historico.pdf', request()->query()) }}"
-                   class="btn btn-sm btn-danger">
-                    <i class="fas fa-file-pdf mr-1"></i>PDF
+                   class="btn btn-sm btn-danger export-btn" data-turbo="false">
+                    <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                 </a>
             </div>
         </div>
@@ -186,40 +216,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var grafica = {!! json_encode($grafica, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-
-        new Chart(document.getElementById('chartTendencia'), {
-            type: 'line',
-            data: {
-                labels: grafica.labels,
-                datasets: [{
-                    label: 'Ingresos',
-                    data: grafica.data,
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0,123,255,0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#007bff',
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.3,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                    x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20 } }
-                }
-            }
-        });
-
-    });
-</script>
-@endpush

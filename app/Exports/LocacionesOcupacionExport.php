@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LocacionesOcupacionExport implements
@@ -16,7 +16,7 @@ class LocacionesOcupacionExport implements
     WithMapping,
     WithStyles,
     WithTitle,
-    ShouldAutoSize
+    WithColumnWidths
 {
     public function __construct(
         private \Illuminate\Support\Collection $ocupacion,
@@ -62,6 +62,20 @@ class LocacionesOcupacionExport implements
                 'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '17A2B8']],
                 'alignment' => ['horizontal' => 'center'],
             ],
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 6,   // #
+            'B' => 25,  // Locación
+            'C' => 14,  // Total accesos
+            'D' => 12,  // En curso
+            'E' => 14,  // Participación
+            'F' => 12,  // Días activa
+            'G' => 14,  // Duración prom.
+            'H' => 18,  // Último acceso
         ];
     }
 

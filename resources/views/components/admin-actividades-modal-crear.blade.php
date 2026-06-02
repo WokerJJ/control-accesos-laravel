@@ -65,7 +65,7 @@
                                 Nombre <span class="text-danger">*</span>
                             </label>
                             <input type="text"
-                                   name="nombre"
+                                   name="nombre" maxlength="150"
                                    class="form-control @error('nombre') is-invalid @enderror"
                                    placeholder="Ej: Conferencia de Inteligencia Artificial"
                                    value="{{ old('nombre') }}"
@@ -79,7 +79,7 @@
                             <label class="form-label">
                                 Descripción <small class="text-muted">(opcional)</small>
                             </label>
-                            <textarea name="descripcion"
+                            <textarea name="descripcion" maxlength="500"
                                       class="form-control @error('descripcion') is-invalid @enderror"
                                       rows="2"
                                       placeholder="Detalles adicionales...">{{ old('descripcion') }}</textarea>

@@ -58,6 +58,43 @@
             color="text-bg-info"/>
     </div>
 
+    @php
+    $chartFlujoLocacion = [
+        'type' => 'bar',
+        'data' => [
+            'labels' => $grafica['labels'],
+            'datasets' => $grafica['datasets'],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'interaction' => ['mode' => 'index', 'intersect' => false],
+            'plugins' => ['legend' => ['position' => 'top']],
+            'scales' => [
+                'x' => ['stacked' => true, 'ticks' => ['maxRotation' => 45]],
+                'y' => ['stacked' => true, 'beginAtZero' => true, 'ticks' => ['stepSize' => 1]],
+            ],
+        ],
+    ];
+
+    $chartDona = [
+        'type' => 'doughnut',
+        'data' => [
+            'labels' => $ocupacion->pluck('nombre')->toArray(),
+            'datasets' => [[
+                'data' => $ocupacion->pluck('total_accesos')->toArray(),
+                'backgroundColor' => ['#007bff','#28a745','#17a2b8','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997'],
+                'borderWidth' => 2,
+            ]],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['position' => 'bottom', 'labels' => ['boxWidth' => 12]]],
+        ],
+    ];
+    @endphp
+
     {{-- ── Gráfica apilada ──────────────────────────── --}}
     <div class="row g-3 mb-4">
         <div class="col-12">
@@ -65,7 +102,7 @@
                 title="Flujo por hora desglosado por locación"
                 icon="fas fa-chart-bar"
                 :height="300">
-                <canvas id="chartFlujoLocacion"></canvas>
+                <canvas id="chartFlujoLocacion" data-chart-config='{!! json_encode($chartFlujoLocacion, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
     </div>
@@ -79,7 +116,7 @@
                 title="Distribución"
                 icon="fas fa-chart-pie"
                 :height="320">
-                <canvas id="chartDona"></canvas>
+                <canvas id="chartDona" data-chart-config='{!! json_encode($chartDona, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
@@ -92,12 +129,12 @@
                     </h3>
                     <div class="d-flex gap-1">
                         <a href="{{ route('admin.reportes.export.locaciones.csv', request()->query()) }}"
-                           class="btn btn-sm btn-success">
-                            <i class="fas fa-file-excel mr-1"></i>Excel
+                           class="btn btn-sm btn-success export-btn" data-turbo="false">
+                            <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                         </a>
                         <a href="{{ route('admin.reportes.export.locaciones.pdf', request()->query()) }}"
-                           class="btn btn-sm btn-danger">
-                            <i class="fas fa-file-pdf mr-1"></i>PDF
+                           class="btn btn-sm btn-danger export-btn" data-turbo="false">
+                            <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                         </a>
                     </div>
                 </div>
@@ -177,55 +214,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var grafica  = {!! json_encode($grafica,  JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-        var ocupacion = {!! json_encode($ocupacion, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-
-        var COLORES = ['#007bff','#28a745','#17a2b8','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997'];
-
-        // ── Barras apiladas por hora ──────────────────
-        new Chart(document.getElementById('chartFlujoLocacion'), {
-            type: 'bar',
-            data: {
-                labels:   grafica.labels,
-                datasets: grafica.datasets,
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { position: 'top' } },
-                scales: {
-                    x: { stacked: true, ticks: { maxRotation: 45 } },
-                    y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } },
-                }
-            }
-        })
-
-        // ── Dona distribución ─────────────────────────
-        new Chart(document.getElementById('chartDona'), {
-            type: 'doughnut',
-            data: {
-                labels:   ocupacion.map(function(l) { return l.nombre }),
-                datasets: [{
-                    data:            ocupacion.map(function(l) { return l.total_accesos }),
-                    backgroundColor: COLORES,
-                    borderWidth:     2,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12 } }
-                }
-            }
-        })
-
-    })
-</script>
-@endpush

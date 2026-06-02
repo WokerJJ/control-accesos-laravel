@@ -24,7 +24,7 @@
             <div class="input-group input-group-lg mb-3">
                 <input
                     type="text"
-                    name="doc_identidad"
+                    name="doc_identidad" maxlength="20"
                     class="form-control @error('doc_identidad') is-invalid @enderror"
                     placeholder="Número de documento"
                     value="{{ old('doc_identidad') }}"
@@ -42,7 +42,7 @@
             <div class="input-group input-group-lg mb-4">
                 <input
                     type="password"
-                    name="password"
+                    name="password" maxlength="100"
                     id="input-password"
                     class="form-control @error('password') is-invalid @enderror"
                     placeholder="Contraseña"

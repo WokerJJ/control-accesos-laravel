@@ -9,3 +9,29 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* ═══════════════════════════════════════════════
+   Fix: Bootstrap modals with Tailwind CSS v4
+   Tailwind preflight resets border/color styles
+   that break Bootstrap's modal backdrop + dialog.
+   ═══════════════════════════════════════════════ */
+.modal {
+    z-index: 1050 !important;
+}
+.modal-backdrop {
+    z-index: 1040 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.modal-backdrop.show {
+    opacity: 0.5 !important;
+}
+.modal-content {
+    background-color: #fff !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: 0.5rem !important;
+}
+
+/* AdminLTE layout: break stacking context so position:fixed modals escape */
+.app-main {
+    isolation: auto !important;
+}

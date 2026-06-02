@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class ActividadesUsadasExport implements
@@ -17,7 +17,7 @@ class ActividadesUsadasExport implements
     WithMapping,
     WithStyles,
     WithTitle,
-    ShouldAutoSize
+    WithColumnWidths
 {
     public function __construct(
         private \Illuminate\Support\Collection $actividades,
@@ -60,6 +60,20 @@ class ActividadesUsadasExport implements
                 'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '28A745']],
                 'alignment' => ['horizontal' => 'center'],
             ],
+        ];
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 6,   // #
+            'B' => 30,  // Actividad
+            'C' => 16,  // Tipo
+            'D' => 22,  // Locación
+            'E' => 12,  // Total usos
+            'F' => 14,  // Participación
+            'G' => 18,  // Último uso
+            'H' => 14,  // Duración prom.
         ];
     }
 

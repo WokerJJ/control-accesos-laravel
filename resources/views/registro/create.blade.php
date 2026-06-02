@@ -56,7 +56,7 @@
                     <div class="form-group">
                         <label class="text-muted">Primer nombre *</label>
                         <input type="text"
-                               name="primer_nombre"
+                               name="primer_nombre" maxlength="50"
                                class="form-control @error('primer_nombre') is-invalid @enderror"
                                value="{{ old('primer_nombre') }}"
                                required>
@@ -67,7 +67,7 @@
                     <div class="form-group">
                         <label class="text-muted">Segundo nombre</label>
                         <input type="text"
-                               name="segundo_nombre"
+                               name="segundo_nombre" maxlength="50"
                                class="form-control"
                                value="{{ old('segundo_nombre') }}">
                     </div>
@@ -80,7 +80,7 @@
                     <div class="form-group">
                         <label class="text-muted">Primer apellido *</label>
                         <input type="text"
-                               name="primer_apellido"
+                               name="primer_apellido" maxlength="50"
                                class="form-control @error('primer_apellido') is-invalid @enderror"
                                value="{{ old('primer_apellido') }}"
                                required>
@@ -91,7 +91,7 @@
                     <div class="form-group">
                         <label class="text-muted">Segundo apellido</label>
                         <input type="text"
-                               name="segundo_apellido"
+                               name="segundo_apellido" maxlength="50"
                                class="form-control"
                                value="{{ old('segundo_apellido') }}">
                     </div>
@@ -104,7 +104,7 @@
                     <div class="form-group">
                         <label class="text-muted">Email</label>
                         <input type="email"
-                               name="email"
+                               name="email" maxlength="100"
                                class="form-control @error('email') is-invalid @enderror"
                                value="{{ old('email') }}">
                     </div>
@@ -114,7 +114,7 @@
                     <div class="form-group">
                         <label class="text-muted">Celular</label>
                         <input type="text"
-                               name="celular"
+                               name="celular" maxlength="15"
                                class="form-control @error('celular') is-invalid @enderror"
                                value="{{ old('celular') }}">
                     </div>

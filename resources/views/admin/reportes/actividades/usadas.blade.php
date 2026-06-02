@@ -51,6 +51,32 @@
         </x-slot:campos>
     </x-dashboard.filtro-card>
 
+    @php
+    $chartActividades = [
+        'type' => 'bar',
+        'data' => [
+            'labels' => $grafica['labels'],
+            'datasets' => [[
+                'label' => 'Usos',
+                'data' => $grafica['data'],
+                'backgroundColor' => ['#007bff','#28a745','#17a2b8','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997'],
+                'borderWidth' => 1,
+                'borderRadius' => 4,
+            ]],
+        ],
+        'options' => [
+            'indexAxis' => 'y',
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['display' => false]],
+            'scales' => [
+                'x' => ['beginAtZero' => true, 'ticks' => ['stepSize' => 1]],
+                'y' => ['ticks' => ['font' => ['size' => 11]]],
+            ],
+        ],
+    ];
+    @endphp
+
     {{-- ── Gráfica + tabla ─────────────────────────── --}}
     <div class="row g-3">
 
@@ -60,7 +86,7 @@
                 title="Top actividades"
                 icon="fas fa-fire"
                 :height="380">
-                <canvas id="chartActividades"></canvas>
+                <canvas id="chartActividades" data-chart-config='{!! json_encode($chartActividades, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
@@ -73,8 +99,8 @@
                     </h3>
                     <div class="d-flex justify-content-end">
                         <a href="{{ route('admin.reportes.export.actividades.csv', request()->query()) }}"
-                           class="btn btn-sm btn-success">
-                            <i class="fas fa-file-excel mr-1"></i>Excel
+                           class="btn btn-sm btn-success export-btn" data-turbo="false">
+                            <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                         </a>
                     </div>
                 </div>
@@ -150,42 +176,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var grafica = {!! json_encode($grafica, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-
-        var COLORES = [
-            '#007bff','#28a745','#17a2b8','#ffc107',
-            '#dc3545','#6f42c1','#fd7e14','#20c997',
-        ];
-
-        new Chart(document.getElementById('chartActividades'), {
-            type: 'bar',
-            data: {
-                labels: grafica.labels,
-                datasets: [{
-                    label: 'Usos',
-                    data: grafica.data,
-                    backgroundColor: COLORES,
-                    borderWidth: 1,
-                    borderRadius: 4,
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, ticks: { stepSize: 1 } },
-                    y: { ticks: { font: { size: 11 } } }
-                }
-            }
-        });
-
-    });
-</script>
-@endpush

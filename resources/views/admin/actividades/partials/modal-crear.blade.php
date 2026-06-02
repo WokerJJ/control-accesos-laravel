@@ -24,7 +24,8 @@
                             </label>
                             <select name="tipo_actividad_id"
                                     class="form-select @error('tipo_actividad_id') is-invalid @enderror"
-                                    required>
+                                    maxlength="150"
+                                   required>
                                 <option value="">— Selecciona una categoría —</option>
                                 @foreach($tiposActividad as $tipo)
                                 <option value="{{ $tipo->id }}"
@@ -62,10 +63,11 @@
                                 Nombre <span class="text-danger">*</span>
                             </label>
                             <input type="text"
-                                   name="nombre"
+                                   name="nombre" maxlength="150"
                                    class="form-control @error('nombre') is-invalid @enderror"
                                    placeholder="Ej: Conferencia de Inteligencia Artificial"
                                    value="{{ old('nombre') }}"
+                                   maxlength="150"
                                    required>
                             @error('nombre')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -78,7 +80,7 @@
                                 Descripción
                                 <small class="text-muted">(opcional)</small>
                             </label>
-                            <textarea name="descripcion"
+                            <textarea name="descripcion" maxlength="500"
                                       class="form-control @error('descripcion') is-invalid @enderror"
                                       rows="2"
                                       placeholder="Detalles adicionales...">{{ old('descripcion') }}</textarea>
@@ -103,6 +105,7 @@
                                    class="form-control @error('fecha_inicio') is-invalid @enderror"
                                    value="{{ old('fecha_inicio', now()->toDateString()) }}"
                                    min="{{ now()->toDateString() }}"
+                                   maxlength="150"
                                    required>
                             @error('fecha_inicio')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -119,6 +122,7 @@
                                    class="form-control @error('fecha_fin') is-invalid @enderror"
                                    value="{{ old('fecha_fin', now()->toDateString()) }}"
                                    min="{{ now()->toDateString() }}"
+                                   maxlength="150"
                                    required>
                             @error('fecha_fin')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -134,6 +138,7 @@
                                    name="hora_inicio"
                                    class="form-control @error('hora_inicio') is-invalid @enderror"
                                    value="{{ old('hora_inicio', '08:00') }}"
+                                   maxlength="150"
                                    required>
                             @error('hora_inicio')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -149,6 +154,7 @@
                                    name="hora_fin"
                                    class="form-control @error('hora_fin') is-invalid @enderror"
                                    value="{{ old('hora_fin', '10:00') }}"
+                                   maxlength="150"
                                    required>
                             @error('hora_fin')
                             <span class="invalid-feedback">{{ $message }}</span>

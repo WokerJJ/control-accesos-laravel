@@ -43,20 +43,102 @@
             color="text-bg-info"/>
     </div>
 
+    @php
+    $chartFlujo = [
+        'type' => 'bar',
+        'data' => [
+            'labels' => $flujoPorHora['labels'],
+            'datasets' => [[
+                'label' => 'Ingresos',
+                'data' => $flujoPorHora['data'],
+                'backgroundColor' => 'rgba(0,123,255,0.7)',
+                'borderColor' => '#007bff',
+                'borderWidth' => 1,
+                'borderRadius' => 4,
+            ]],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['display' => false]],
+            'scales' => [
+                'y' => ['beginAtZero' => true, 'ticks' => ['stepSize' => 1]],
+                'x' => ['ticks' => ['maxRotation' => 45]],
+            ],
+        ],
+    ];
+
+    $chartLocacion = [
+        'type' => 'doughnut',
+        'data' => [
+            'labels' => $porLocacion['labels'],
+            'datasets' => [[
+                'data' => $porLocacion['data'],
+                'backgroundColor' => ['#007bff','#28a745','#17a2b8','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997'],
+                'borderWidth' => 2,
+            ]],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['position' => 'bottom', 'labels' => ['boxWidth' => 12]]],
+        ],
+    ];
+
+    $chartActividad = [
+        'type' => 'bar',
+        'data' => [
+            'labels' => $porActividad['labels'],
+            'datasets' => [[
+                'label' => 'Accesos',
+                'data' => $porActividad['data'],
+                'backgroundColor' => 'rgba(40,167,69,0.75)',
+                'borderColor' => '#28a745',
+                'borderWidth' => 1,
+                'borderRadius' => 4,
+            ]],
+        ],
+        'options' => [
+            'indexAxis' => 'y',
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['display' => false]],
+            'scales' => ['x' => ['beginAtZero' => true, 'ticks' => ['stepSize' => 1]]],
+        ],
+    ];
+
+    $chartEstado = [
+        'type' => 'doughnut',
+        'data' => [
+            'labels' => ['En curso', 'Completados'],
+            'datasets' => [[
+                'data' => [$kpis['en_curso'], $kpis['completados']],
+                'backgroundColor' => ['#28a745', '#6c757d'],
+                'borderWidth' => 2,
+            ]],
+        ],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['position' => 'bottom', 'labels' => ['boxWidth' => 12]]],
+        ],
+    ];
+    @endphp
+
     {{-- ── Gráficas fila 1 ─────────────────────────── --}}
     <div class="row g-3 mb-4">
 
         {{-- Flujo por hora --}}
         <div class="col-md-8">
             <x-reporte.chart-card title="Flujo de ingresos por hora" icon="fas fa-stream" :height="280">
-                <canvas id="chartFlujo"></canvas>
+                <canvas id="chartFlujo" data-chart-config='{!! json_encode($chartFlujo, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
         {{-- Por locación --}}
         <div class="col-md-4">
             <x-reporte.chart-card title="Por locación" icon="fas fa-map-marker-alt" :height="280">
-                <canvas id="chartLocacion"></canvas>
+                <canvas id="chartLocacion" data-chart-config='{!! json_encode($chartLocacion, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
@@ -68,14 +150,14 @@
         {{-- Por actividad --}}
         <div class="col-md-6">
             <x-reporte.chart-card title="Actividades más registradas" icon="fas fa-tasks" :height="260">
-                <canvas id="chartActividad"></canvas>
+                <canvas id="chartActividad" data-chart-config='{!! json_encode($chartActividad, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
         {{-- Completados vs En curso — dona --}}
         <div class="col-md-6">
             <x-reporte.chart-card title="Estado de accesos" icon="fas fa-chart-pie" :height="260">
-                <canvas id="chartEstado"></canvas>
+                <canvas id="chartEstado" data-chart-config='{!! json_encode($chartEstado, JSON_HEX_TAG | JSON_HEX_APOS) !!}'></canvas>
             </x-reporte.chart-card>
         </div>
 
@@ -144,105 +226,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var flujo     = {!! json_encode($flujoPorHora, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-        var locacion  = {!! json_encode($porLocacion,  JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-        var actividad = {!! json_encode($porActividad, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-        var kpis      = {!! json_encode($kpis,         JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!};
-
-        const COLORES = [
-            '#007bff','#28a745','#17a2b8','#ffc107',
-            '#dc3545','#6f42c1','#fd7e14','#20c997',
-        ]
-
-        new Chart(document.getElementById('chartFlujo'), {
-            type: 'bar',
-            data: {
-                labels: flujo.labels,
-                datasets: [{
-                    label: 'Ingresos',
-                    data: flujo.data,
-                    backgroundColor: 'rgba(0,123,255,0.7)',
-                    borderColor: '#007bff',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                    x: { ticks: { maxRotation: 45 } }
-                }
-            }
-        })
-
-        new Chart(document.getElementById('chartLocacion'), {
-            type: 'doughnut',
-            data: {
-                labels: locacion.labels,
-                datasets: [{
-                    data: locacion.data,
-                    backgroundColor: COLORES,
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12 } }
-                }
-            }
-        })
-
-        new Chart(document.getElementById('chartActividad'), {
-            type: 'bar',
-            data: {
-                labels: actividad.labels,
-                datasets: [{
-                    label: 'Accesos',
-                    data: actividad.data,
-                    backgroundColor: 'rgba(40,167,69,0.75)',
-                    borderColor: '#28a745',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-            }
-        })
-
-        new Chart(document.getElementById('chartEstado'), {
-            type: 'doughnut',
-            data: {
-                labels: ['En curso', 'Completados'],
-                datasets: [{
-                    data: [kpis.en_curso, kpis.completados],
-                    backgroundColor: ['#28a745', '#6c757d'],
-                    borderWidth: 2,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12 } }
-                }
-            }
-        })
-
-    })
-</script>
-@endpush

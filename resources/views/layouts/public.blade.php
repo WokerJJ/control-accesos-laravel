@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700&display=fallback">
     <link rel="stylesheet" href="/adminlte/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/adminlte/dist/css/adminlte.min.css">
-
+    
     @stack('styles')
 </head>
 <body class="hold-transition" style="background: #1a1a2e;">
@@ -25,7 +25,9 @@
     </div>
 
     {{-- Contenido de la vista --}}
-    @yield('content')
+    <turbo-frame id="main" style="display: contents;">
+        @yield('content')
+    </turbo-frame>
 
     {{-- Mensaje de alerta si existe --}}
     <x-alerta />

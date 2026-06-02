@@ -25,7 +25,8 @@
                     <label>Buscar</label>
                     <input type="text" name="buscar" class="form-control"
                            placeholder="Nombre o documento"
-                           value="{{ request('buscar') }}">
+                           value="{{ request('buscar') }}"
+                           maxlength="100">
                 </div>
             </div>
             <div class="col-md-2">

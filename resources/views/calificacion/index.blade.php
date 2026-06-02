@@ -79,7 +79,7 @@
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">
                         Comentario <span class="fw-normal">(opcional)</span>
                     </label>
-                    <textarea name="comentario"
+                    <textarea name="comentario" maxlength="500"
                               rows="3"
                               class="form-control"
                               placeholder="¿Cómo fue tu experiencia?"

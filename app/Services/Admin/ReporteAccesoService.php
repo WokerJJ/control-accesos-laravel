@@ -228,8 +228,8 @@ class ReporteAccesoService
     public function kpisPeriodo(string $desde, string $hasta, ?int $locacionId = null): array
     {
         $base = Acceso::query()
-            ->whereDate('hora_ingreso', '>=', $desde)
-            ->whereDate('hora_ingreso', '<=', $hasta);
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59');
 
         if ($locacionId) {
             $base->where('locacion_id', $locacionId);
@@ -257,8 +257,8 @@ class ReporteAccesoService
     public function ingresoPorDia(string $desde, string $hasta, ?int $locacionId = null): array
     {
         $base = Acceso::query()
-            ->whereDate('hora_ingreso', '>=', $desde)
-            ->whereDate('hora_ingreso', '<=', $hasta);
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59');
 
         if ($locacionId) {
             $base->where('locacion_id', $locacionId);
@@ -315,8 +315,8 @@ class ReporteAccesoService
                 'locacion:id,nombre',
                 'actividad:id,nombre',
             ])
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('accesos.hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('accesos.hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->when($locacionId, fn($q) => $q->where('accesos.locacion_id', $locacionId))
             ->when($estado,     fn($q) => $q->where('accesos.estado', $estado))
             ->when($buscar, function ($q) use ($buscar) {
@@ -342,8 +342,8 @@ class ReporteAccesoService
         int $limite = 10
     ): Collection {
         $total = Acceso::query()
-            ->whereDate('hora_ingreso', '>=', $desde)
-            ->whereDate('hora_ingreso', '<=', $hasta)
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->when($locacionId, fn($q) => $q->where('locacion_id', $locacionId))
             ->count();
 
@@ -359,8 +359,8 @@ class ReporteAccesoService
         ')
             ->join('actividades', 'actividades.id', '=', 'accesos.actividad_id')
             ->leftJoin('locacion', 'locacion.id', '=', 'actividades.locacion_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('accesos.hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('accesos.hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->when($locacionId, fn($q) => $q->where('accesos.locacion_id', $locacionId))
             ->groupBy('actividades.id', 'actividades.nombre', 'actividades.tipo', 'locacion.nombre')
             ->orderByDesc('total_usos')
@@ -391,8 +391,8 @@ class ReporteAccesoService
         $rows = Acceso::query()
             ->selectRaw('actividades.nombre as nombre, COUNT(*) as total')
             ->join('actividades', 'actividades.id', '=', 'accesos.actividad_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('accesos.hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('accesos.hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->when($locacionId, fn($q) => $q->where('accesos.locacion_id', $locacionId))
             ->groupBy('actividades.nombre')
             ->orderByDesc('total')
@@ -411,15 +411,15 @@ class ReporteAccesoService
     public function kpisLocaciones(string $desde, string $hasta): array
     {
         $totalAccesos = Acceso::query()
-            ->whereDate('hora_ingreso', '>=', $desde)
-            ->whereDate('hora_ingreso', '<=', $hasta)
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->count();
 
         $locacionMasUsada = Acceso::query()
             ->selectRaw('locacion.nombre, COUNT(*) as total')
             ->join('locacion', 'locacion.id', '=', 'accesos.locacion_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->groupBy('locacion.nombre')
             ->orderByDesc('total')
             ->first();
@@ -427,8 +427,8 @@ class ReporteAccesoService
         $horasPico = Acceso::query()
             ->selectRaw('locacion.nombre, HOUR(accesos.hora_ingreso) as hora, COUNT(*) as total')
             ->join('locacion', 'locacion.id', '=', 'accesos.locacion_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->groupBy('locacion.nombre', 'hora')
             ->orderByDesc('total')
             ->first();
@@ -449,8 +449,8 @@ class ReporteAccesoService
     public function ocupacionPorLocacion(string $desde, string $hasta): \Illuminate\Support\Collection
     {
         $total = Acceso::query()
-            ->whereDate('hora_ingreso', '>=', $desde)
-            ->whereDate('hora_ingreso', '<=', $hasta)
+            ->where('hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->count();
 
         return Acceso::query()
@@ -464,8 +464,8 @@ class ReporteAccesoService
             COUNT(DISTINCT DATE(accesos.hora_ingreso))  as dias_activa
         ')
             ->join('locacion', 'locacion.id', '=', 'accesos.locacion_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('accesos.hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('accesos.hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->groupBy('locacion.id', 'locacion.nombre')
             ->orderByDesc('total_accesos')
             ->get()
@@ -491,8 +491,8 @@ class ReporteAccesoService
         $rows = Acceso::query()
             ->selectRaw('locacion.nombre as locacion, HOUR(accesos.hora_ingreso) as hora, COUNT(*) as total')
             ->join('locacion', 'locacion.id', '=', 'accesos.locacion_id')
-            ->whereDate('accesos.hora_ingreso', '>=', $desde)
-            ->whereDate('accesos.hora_ingreso', '<=', $hasta)
+            ->where('accesos.hora_ingreso', '>=', $desde . ' 00:00:00')
+            ->where('accesos.hora_ingreso', '<=', $hasta . ' 23:59:59')
             ->groupBy('locacion.nombre', 'hora')
             ->orderBy('hora')
             ->get();

@@ -28,7 +28,7 @@
                 <label class="text-muted">Número de documento</label>
                 <input
                     type="text"
-                    name="doc_identidad"
+                    name="doc_identidad" maxlength="20"
                     id="doc_identidad"
                     class="form-control form-control-lg @error('doc_identidad') is-invalid @enderror"
                     placeholder="Ej: 1234567890"

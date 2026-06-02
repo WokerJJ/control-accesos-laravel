@@ -87,7 +87,8 @@
                                        name="email"
                                        class="form-control @error('email') is-invalid @enderror"
                                        value="{{ old('email', $persona->email) }}"
-                                       placeholder="correo@ejemplo.com">
+                                       placeholder="correo@ejemplo.com"
+                                       maxlength="100">
                                 @error('email')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -99,7 +100,8 @@
                                        name="celular"
                                        class="form-control @error('celular') is-invalid @enderror"
                                        value="{{ old('celular', $persona->celular) }}"
-                                       placeholder="3001234567">
+                                       placeholder="3001234567"
+                                       maxlength="15">
                                 @error('celular')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -128,7 +130,8 @@
                                        name="direccion"
                                        class="form-control @error('direccion') is-invalid @enderror"
                                        value="{{ old('direccion', $persona->direccion) }}"
-                                       placeholder="Calle 123 # 45-67">
+                                       placeholder="Calle 123 # 45-67"
+                                       maxlength="255">
                                 @error('direccion')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -162,7 +165,8 @@
                                 <input type="password"
                                        name="password_actual"
                                        class="form-control @error('password_actual') is-invalid @enderror"
-                                       placeholder="Tu contraseña actual">
+                                       placeholder="Tu contraseña actual"
+                                       maxlength="100">
                                 @error('password_actual')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -173,7 +177,8 @@
                                 <input type="password"
                                        name="password"
                                        class="form-control @error('password') is-invalid @enderror"
-                                       placeholder="Mínimo 8 caracteres">
+                                       placeholder="Mínimo 8 caracteres"
+                                       maxlength="100">
                                 @error('password')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -184,7 +189,8 @@
                                 <input type="password"
                                        name="password_confirmation"
                                        class="form-control"
-                                       placeholder="Repite la nueva contraseña">
+                                       placeholder="Repite la nueva contraseña"
+                                       maxlength="100">
                             </div>
 
                         </div>

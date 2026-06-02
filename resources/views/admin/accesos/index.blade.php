@@ -48,7 +48,8 @@
                 <label>Buscar persona</label>
                 <input type="text" name="buscar" class="form-control"
                        placeholder="Documento o nombre"
-                       value="{{ request('buscar') }}">
+                       value="{{ request('buscar') }}"
+                       maxlength="100">
             </div>
         </div>
     </x-slot:campos>
