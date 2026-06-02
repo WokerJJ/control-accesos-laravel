@@ -13,11 +13,21 @@ class AccesoAdminService
 {
     public function obtenerStats(): array
     {
+        $hoy = now('America/Bogota')->toDateString();
+
+        $row = Acceso::query()
+            ->selectRaw('
+                SUM(CASE WHEN hora_ingreso >= ? AND hora_ingreso <= ? THEN 1 ELSE 0 END) as hoy,
+                SUM(CASE WHEN estado = "en_curso" THEN 1 ELSE 0 END) as en_curso,
+                SUM(CASE WHEN hora_salida >= ? AND hora_salida <= ? THEN 1 ELSE 0 END) as salidas
+            ', [$hoy . ' 00:00:00', $hoy . ' 23:59:59', $hoy . ' 00:00:00', $hoy . ' 23:59:59'])
+            ->first();
+
         return [
-            'hoy' => Acceso::whereDate('hora_ingreso',today())->count(),
-            'en_curso' => Acceso::where('estado','en_curso')->count(),
-            'salidas' => Acceso::whereDate('hora_salida',today())->count(),
-            'casilleros_ocupados' => Casillero::where('estado','ocupado')->count(),
+            'hoy'               => (int) $row->hoy,
+            'en_curso'          => (int) $row->en_curso,
+            'salidas'           => (int) $row->salidas,
+            'casilleros_ocupados' => Casillero::where('estado', 'ocupado')->count(),
         ];
     }
 
@@ -39,7 +49,8 @@ class AccesoAdminService
             ->when($filtros['fecha'] ?? null,
                 function ($q, $fecha) {
                     match($fecha) {
-                        'hoy'    => $q->whereDate('hora_ingreso', today()),
+                        'hoy'    => $q->where('hora_ingreso', '>=', now('America/Bogota')->startOfDay()->toDateTimeString())
+                                      ->where('hora_ingreso', '<=', now('America/Bogota')->endOfDay()->toDateTimeString()),
                         'semana' => $q->where('hora_ingreso', '>=', now()->startOfWeek()),
                         'mes'    => $q->whereMonth('hora_ingreso', now()->month),
                         default  => null,
@@ -106,7 +117,7 @@ class AccesoAdminService
 
         $hayPendientes = Acceso::query()
             ->where('estado', 'en_curso')
-            ->whereDate('hora_ingreso', '<', today('America/Bogota'))
+            ->where('hora_ingreso', '<', now('America/Bogota')->startOfDay()->toDateTimeString())
             ->exists();
 
         if ($hayPendientes) {

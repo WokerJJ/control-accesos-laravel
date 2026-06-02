@@ -21,6 +21,7 @@ function initTurboCharts() {
 
 document.addEventListener('DOMContentLoaded', initTurboCharts);
 document.addEventListener('turbo:load', initTurboCharts);
+document.addEventListener('turbo:frame-load', initTurboCharts);
 
 // ═══════════════════════════════════════════════
 // Global Chart reference
@@ -40,6 +41,7 @@ function loadCalendar() {
 
 document.addEventListener('DOMContentLoaded', loadCalendar);
 document.addEventListener('turbo:load', loadCalendar);
+document.addEventListener('turbo:frame-load', loadCalendar);
 
 // ═══════════════════════════════════════════════
 // AdminLTE sidebar (Turbo-compatible via delegation)
@@ -90,6 +92,7 @@ function initCharCounters() {
 
 document.addEventListener('DOMContentLoaded', initCharCounters);
 document.addEventListener('turbo:load', initCharCounters);
+document.addEventListener('turbo:frame-load', initCharCounters);
 
 // Treeview accordion — only toggle on parent items (href="#")
 document.addEventListener('click', (e) => {
