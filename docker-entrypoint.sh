@@ -8,8 +8,8 @@ echo "========================================="
 # ── .env ───────────────────────────────────────
 if [ ! -f .env ]; then
     cp .env.example .env
-    php artisan key:generate --force --ansi
 fi
+php artisan key:generate --force --ansi
 
 # ── SQLite ─────────────────────────────────────
 touch database/database.sqlite

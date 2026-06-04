@@ -59,11 +59,7 @@ COPY --from=deps /app/vendor/ vendor/
 # 3) Copy built assets from Node stage
 COPY --from=frontend /app/public/build/ public/build/
 
-# 4) Copy AdminLTE assets if present in node_modules
-RUN if [ -d "node_modules/admin-lte/dist" ]; then \
-        mkdir -p public/adminlte/dist && \
-        cp -r node_modules/admin-lte/dist/* public/adminlte/dist/ ; \
-    fi
+
 
 # 5) Create storage dirs, SQLite file, .env
 RUN mkdir -p storage/app/public storage/framework/{cache/data,sessions,views} \
