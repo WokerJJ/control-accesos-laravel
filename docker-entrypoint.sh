@@ -30,7 +30,16 @@ echo "MySQL listo!"
 
 # ── Laravel setup ──────────────────────────────
 php artisan storage:link --force --ansi 2>/dev/null || true
-php artisan migrate --force --ansi
+
+# Only run migrations if the database is empty (first run)
+TABLE_EXISTS=$(php artisan tinker --execute="echo Schema::hasTable('accesos') ? 'yes' : 'no';" 2>/dev/null || echo "no")
+if [ "$TABLE_EXISTS" = "yes" ]; then
+    echo "Base de datos ya inicializada, saltando migraciones"
+else
+    echo "Base de datos nueva, ejecutando migraciones..."
+    php artisan migrate --force --ansi
+fi
+
 php artisan config:clear --ansi 2>/dev/null || true
 php artisan view:clear --ansi 2>/dev/null || true
 
