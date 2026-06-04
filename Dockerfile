@@ -21,7 +21,8 @@ RUN composer install \
     --no-plugins \
     --no-scripts \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --ignore-platform-reqs
 
 # ═══════════════════════════════════════════════════════════════
 # Stage 3: Final image — PHP 8.3 + Apache
