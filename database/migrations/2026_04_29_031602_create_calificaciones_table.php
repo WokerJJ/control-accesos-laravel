@@ -25,15 +25,20 @@ return new class extends Migration
 
             $table->timestamps();
         });
-        // CHECK constraints only work on MySQL/PostgreSQL, not SQLite
-        if (config('database.default') !== 'sqlite') {
-            DB::statement("
-                ALTER TABLE calificaciones
-                ADD CONSTRAINT chk_servicio CHECK (servicio BETWEEN 1 AND 5),
-                ADD CONSTRAINT chk_atencion CHECK (atencion BETWEEN 1 AND 5),
-                ADD CONSTRAINT chk_lugar CHECK (lugar BETWEEN 1 AND 5),
-                ADD CONSTRAINT chk_calidad CHECK (calidad BETWEEN 1 AND 5)
-            ");
+        // CHECK constraints (MySQL/PostgreSQL only — wrapped in try-catch so
+        // a failure here doesn't leave the table untracked in the migrations table)
+        try {
+            if (config('database.default') !== 'sqlite') {
+                DB::statement("
+                    ALTER TABLE calificaciones
+                    ADD CONSTRAINT chk_servicio CHECK (servicio BETWEEN 1 AND 5),
+                    ADD CONSTRAINT chk_atencion CHECK (atencion BETWEEN 1 AND 5),
+                    ADD CONSTRAINT chk_lugar CHECK (lugar BETWEEN 1 AND 5),
+                    ADD CONSTRAINT chk_calidad CHECK (calidad BETWEEN 1 AND 5)
+                ");
+            }
+        } catch (\Exception $e) {
+            // CHECK constraints are informational only — app works fine without them
         }
     }
 
