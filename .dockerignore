@@ -24,7 +24,6 @@ bootstrap/cache/*
 .phpunit.cache
 Dockerfile
 docker-compose*.yml
-docker-entrypoint.sh
 README.md
 *.md
 .DS_Store
