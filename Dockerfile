@@ -49,6 +49,10 @@ RUN { \
 
 RUN a2enmod rewrite
 
+# Point Apache DocumentRoot to Laravel's public/ directory
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -i -E 's|/var/www/html|${APACHE_DOCUMENT_ROOT}|g' /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf
+
 WORKDIR /var/www/html
 
 # 1) Copy source code
