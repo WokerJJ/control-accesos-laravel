@@ -8,8 +8,7 @@ echo "========================================="
 # ── Create .env directly (no sed, no fragility) ──
 if [ ! -f .env ]; then
     echo "Creando .env..."
-    php artisan key:generate --show > /dev/null
-    APP_KEY=$(php artisan key:generate --show 2>/dev/null)
+    APP_KEY=$(php -r "echo 'base64:' . base64_encode(random_bytes(32));")
 
     cat > .env <<EOF
 APP_NAME="Control de Accesos"
