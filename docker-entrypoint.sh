@@ -12,11 +12,11 @@ fi
 
 # ── Configure .env for MySQL ───────────────────
 sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" .env
-sed -i "s/^#\? *DB_HOST=.*/DB_HOST=${DB_HOST}/" .env
-sed -i "s/^#\? *DB_PORT=.*/DB_PORT=${DB_PORT}/" .env
-sed -i "s/^#\? *DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
-sed -i "s/^#\? *DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
-sed -i "s/^#\? *DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
+sed -Ei "s/^#?[[:space:]]*DB_HOST=.*/DB_HOST=${DB_HOST}/" .env
+sed -Ei "s/^#?[[:space:]]*DB_PORT=.*/DB_PORT=${DB_PORT}/" .env
+sed -Ei "s/^#?[[:space:]]*DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
+sed -Ei "s/^#?[[:space:]]*DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
+sed -Ei "s/^#?[[:space:]]*DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
 
 # ── Generate APP_KEY ──────────────────────────
 php artisan key:generate --force --ansi
