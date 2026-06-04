@@ -5,41 +5,50 @@ echo "========================================="
 echo "  Control de Accesos — Iniciando..."
 echo "========================================="
 
-# ── .env ───────────────────────────────────────
+# ── Create .env directly (no sed, no fragility) ──
 if [ ! -f .env ]; then
-    cp .env.example .env
+    echo "Creando .env..."
+    php artisan key:generate --show > /dev/null
+    APP_KEY=$(php artisan key:generate --show 2>/dev/null)
+
+    cat > .env <<EOF
+APP_NAME="Control de Accesos"
+APP_ENV=local
+APP_KEY=${APP_KEY}
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=${DB_HOST:-db}
+DB_PORT=${DB_PORT:-3306}
+DB_DATABASE=${DB_DATABASE:-control_accesos}
+DB_USERNAME=${DB_USERNAME:-control_accesos}
+DB_PASSWORD=${DB_PASSWORD:-secret}
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+EOF
+    echo ".env creado!"
+else
+    # Ensure APP_KEY exists
+    grep -q "APP_KEY=base64:" .env || php artisan key:generate --force --ansi
 fi
-
-# ── Configure .env for MySQL ───────────────────
-sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" .env
-sed -Ei "s/^#?[[:space:]]*DB_HOST=.*/DB_HOST=${DB_HOST}/" .env
-sed -Ei "s/^#?[[:space:]]*DB_PORT=.*/DB_PORT=${DB_PORT}/" .env
-sed -Ei "s/^#?[[:space:]]*DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
-sed -Ei "s/^#?[[:space:]]*DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
-sed -Ei "s/^#?[[:space:]]*DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
-
-# ── Generate APP_KEY ──────────────────────────
-php artisan key:generate --force --ansi
 
 # ── Wait for MySQL ────────────────────────────
 echo "Esperando a que MySQL este listo..."
-until php -r "new PDO('mysql:host=${DB_HOST};port=${DB_PORT}', '${DB_USERNAME}', '${DB_PASSWORD}');" 2>/dev/null; do
+until php -r "new PDO('mysql:host=${DB_HOST:-db};port=${DB_PORT:-3306}', '${DB_USERNAME:-control_accesos}', '${DB_PASSWORD:-secret}');" 2>/dev/null; do
     sleep 2
 done
 echo "MySQL listo!"
 
+# ── Wipe DB and run fresh migrations ──────────
+echo "Limpiando y recreando base de datos..."
+php artisan migrate:fresh --force --ansi
+
 # ── Laravel setup ──────────────────────────────
 php artisan storage:link --force --ansi 2>/dev/null || true
-
-# Only run migrations if the database is empty (first run)
-TABLE_EXISTS=$(php artisan tinker --execute="echo Schema::hasTable('accesos') ? 'yes' : 'no';" 2>/dev/null || echo "no")
-if [ "$TABLE_EXISTS" = "yes" ]; then
-    echo "Base de datos ya inicializada, saltando migraciones"
-else
-    echo "Base de datos nueva, ejecutando migraciones..."
-    php artisan migrate --force --ansi
-fi
-
 php artisan config:clear --ansi 2>/dev/null || true
 php artisan view:clear --ansi 2>/dev/null || true
 

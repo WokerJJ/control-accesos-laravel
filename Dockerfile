@@ -63,8 +63,7 @@ COPY --from=frontend /app/public/build/ public/build/
 RUN mkdir -p storage/app/public storage/framework/{cache/data,sessions,views} \
         storage/logs bootstrap/cache public/storage \
     && chown -R www-data:www-data storage bootstrap/cache public/storage \
-    && chmod -R 775 storage bootstrap/cache \
-    && if [ ! -f .env ]; then cp .env.example .env; fi
+    && chmod -R 775 storage bootstrap/cache
 
 # 5) Copy entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
