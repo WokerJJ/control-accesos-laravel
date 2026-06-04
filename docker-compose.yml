@@ -2,78 +2,22 @@
 # Control de Accesos — Docker Compose
 # ═══════════════════════════════════════════════════════════════
 #
-# Uso con SQLite (recomendado para portabilidad):
 #   docker compose up -d
-#
-# Uso con MySQL:
-#   docker compose --profile mysql up -d
 #
 # Acceso: http://localhost:8000
 # ═══════════════════════════════════════════════════════════════
 
 services:
-  # ── App (PHP + Apache) ──────────────────────────────────────
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: control-accesos-app
+    build: .
+    container_name: control-accesos
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8000}:80"
+      - "8000:80"
     volumes:
-      - .:/var/www/html
-      - sqlite-data:/var/www/html/database
-      - storage-app:/var/www/html/storage/app
-      - storage-public:/var/www/html/storage/app/public
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=${APP_DEBUG:-true}
-      - APP_URL=${APP_URL:-http://localhost:8000}
-      - DB_CONNECTION=${DB_CONNECTION:-sqlite}
-      # MySQL (used when mysql profile is active)
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_DATABASE:-control_accesos}
-      - DB_USERNAME=${DB_USERNAME:-root}
-      - DB_PASSWORD=${DB_PASSWORD:-secret}
-    depends_on:
-      mysql:
-        condition: service_healthy
-        required: false
-    networks:
-      - app-network
-
-  # ── MySQL (opcional, solo con --profile mysql) ──────────────
-  mysql:
-    image: mysql:8.0
-    container_name: control-accesos-mysql
-    restart: unless-stopped
-    profiles:
-      - mysql
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_DATABASE: ${DB_DATABASE:-control_accesos}
-      MYSQL_USER: ${DB_USERNAME:-root}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - app-network
+      - db-data:/var/www/html/database
+      - storage-data:/var/www/html/storage
 
 volumes:
-  sqlite-data:
-  storage-app:
-  storage-public:
-  mysql-data:
-
-networks:
-  app-network:
-    driver: bridge
+  db-data:
+  storage-data:

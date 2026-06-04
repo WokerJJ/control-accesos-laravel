@@ -1,38 +1,17 @@
-# Git
 .git
 .gitignore
-
-# IDE
-.idea
 .vscode
-.cursor
-.nova
-.zed
-.codex
-.phpactor.json
+.idea
 .claude
-
-# Dependencies (will be installed in container)
 node_modules
 vendor
-
-# Build artifacts (will be built in container)
 public/build
 public/hot
-
-# Environment
 .env
 .env.backup
 .env.production
-.env.docker
-
-# Logs
 storage/logs/*
 !storage/logs/.gitignore
-npm-debug.log
-yarn-error.log
-
-# Cache
 storage/framework/cache/*
 !storage/framework/cache/.gitignore
 storage/framework/sessions/*
@@ -41,30 +20,12 @@ storage/framework/views/*
 !storage/framework/views/.gitignore
 bootstrap/cache/*
 !bootstrap/cache/.gitignore
-
-# Testing
 .phpunit.result.cache
 .phpunit.cache
-phpunit.xml
-
-# OS files
-.DS_Store
-Thumbs.db
-*.log
-
-# Docker files
-docker-compose.yml
+Dockerfile
 docker-compose*.yml
 docker-entrypoint.sh
-Dockerfile
-
-# Documentation
 README.md
 *.md
-
-# Other
-auth.json
-Homestead.json
-Homestead.yaml
-storage/pail
-phpunit.xml
+.DS_Store
+Thumbs.db
