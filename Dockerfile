@@ -28,13 +28,13 @@ RUN composer install \
 # ═══════════════════════════════════════════════════════════════
 FROM php:8.3-apache-bookworm
 
-# System deps + PHP extensions
+# System deps + PHP extensions (MySQL only)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
         libonig-dev libxml2-dev libzip-dev libcurl4-openssl-dev \
-        unzip sqlite3 libsqlite3-dev \
+        unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring xml zip bcmath gd opcache \
+    && docker-php-ext-install pdo pdo_mysql mbstring xml zip bcmath gd opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # PHP config
@@ -53,23 +53,20 @@ WORKDIR /var/www/html
 # 1) Copy source code
 COPY . .
 
-# 2) Copy vendor from Composer stage (overrides if local vendor existed)
+# 2) Copy vendor from Composer stage
 COPY --from=deps /app/vendor/ vendor/
 
 # 3) Copy built assets from Node stage
 COPY --from=frontend /app/public/build/ public/build/
 
-
-
-# 5) Create storage dirs, SQLite file, .env
+# 4) Create dirs and .env
 RUN mkdir -p storage/app/public storage/framework/{cache/data,sessions,views} \
         storage/logs bootstrap/cache public/storage \
-    && touch database/database.sqlite \
-    && chown -R www-data:www-data storage bootstrap/cache public/storage database/database.sqlite \
+    && chown -R www-data:www-data storage bootstrap/cache public/storage \
     && chmod -R 775 storage bootstrap/cache \
     && if [ ! -f .env ]; then cp .env.example .env; fi
 
-# 6) Copy entrypoint
+# 5) Copy entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

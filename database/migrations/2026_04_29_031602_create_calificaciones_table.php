@@ -25,13 +25,16 @@ return new class extends Migration
 
             $table->timestamps();
         });
-        DB::statement("
-            ALTER TABLE calificaciones
-            ADD CONSTRAINT chk_servicio CHECK (servicio BETWEEN 1 AND 5),
-            ADD CONSTRAINT chk_atencion CHECK (atencion BETWEEN 1 AND 5),
-            ADD CONSTRAINT chk_lugar CHECK (lugar BETWEEN 1 AND 5),
-            ADD CONSTRAINT chk_calidad CHECK (calidad BETWEEN 1 AND 5)
-        ");
+        // CHECK constraints only work on MySQL/PostgreSQL, not SQLite
+        if (config('database.default') !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE calificaciones
+                ADD CONSTRAINT chk_servicio CHECK (servicio BETWEEN 1 AND 5),
+                ADD CONSTRAINT chk_atencion CHECK (atencion BETWEEN 1 AND 5),
+                ADD CONSTRAINT chk_lugar CHECK (lugar BETWEEN 1 AND 5),
+                ADD CONSTRAINT chk_calidad CHECK (calidad BETWEEN 1 AND 5)
+            ");
+        }
     }
 
     public function down(): void
