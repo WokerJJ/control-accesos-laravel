@@ -93,7 +93,7 @@
 {{-- Botón editar al pie del detalle --}}
 <div class="mt-3 text-end">
     <button class="btn btn-primary btn-sm btn-editar"
-            data-id="{{ $usuario->id }}"
+            data-id="{{ $usuario->usuario_id }}"
             data-email="{{ $usuario->email }}"
             data-celular="{{ $usuario->celular }}"
             data-direccion="{{ $usuario->direccion }}"

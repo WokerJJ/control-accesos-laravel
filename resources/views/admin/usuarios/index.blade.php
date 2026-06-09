@@ -122,14 +122,14 @@
                                 <button class="btn btn-outline-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#detalleModal"
-                                        data-id="{{ $usuario->id }}"
+                                        data-id="{{ $usuario->usuario_id }}"
                                         title="Ver detalle">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-outline-warning"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editarModal"
-                                        data-id="{{ $usuario->id }}"
+                                        data-id="{{ $usuario->usuario_id }}"
                                         title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -181,7 +181,9 @@
         </div>`
 
         let editarId = null
-        let _usuariosAbortCtrl = null;
+        let _usuariosAbortCtrl = null
+        let _editarAbortCtrl = null
+        let _guardarAbortCtrl = null
 
         // ═══════════════════════════════════════════════════
         // MODAL DETALLE (carga vía AJAX)
@@ -259,18 +261,24 @@
             // Si viene de la tabla (no del detalle), cargar datos vía AJAX
             if (!btn.classList.contains('btn-editar')) {
                 const id = btn.dataset.id
+
+                // Cancelar petición anterior si existe
+                if (_editarAbortCtrl) _editarAbortCtrl.abort()
+                _editarAbortCtrl = new AbortController()
+
                 fetch(`/admin/usuarios/${id}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'  // ← Esto activa el JSON en el controller
-                    }
+                        'Accept': 'application/json'
+                    },
+                    signal: _editarAbortCtrl.signal
                 })
                     .then(r => {
                         if (!r.ok) throw new Error('Error ' + r.status)
                         return r.json()
                     })
                     .then(data => abrirEditar({
-                        id:           data.id,
+                        id:           data.usuario_id,
                         email:        data.email,
                         celular:      data.celular,
                         direccion:    data.direccion,
@@ -278,7 +286,10 @@
                         rol_id:       data.rol_id,
                         estado:       data.estado,
                     }))
-                    .catch(() => alert('Error al cargar datos para editar'))
+                    .catch(err => {
+                        if (err.name === 'AbortError') return
+                        alert('Error al cargar datos para editar')
+                    })
             }
         })
 
@@ -292,11 +303,18 @@
             document.getElementById('edit_rol_id').value       = datos.rol_id
             document.getElementById('edit_estado').value       = datos.estado
 
-            // Cerrar detalle si está abierto
+            // Cerrar detalle si está abierto, esperar a que termine, luego abrir editar
             const detalleModal = bootstrap.Modal.getInstance(detalleModalEl)
-            if (detalleModal) detalleModal.hide()
-
-            bootstrap.Modal.getOrCreateInstance(editarModalEl).show()
+            if (detalleModal) {
+                const onHidden = function () {
+                    detalleModalEl.removeEventListener('hidden.bs.modal', onHidden)
+                    bootstrap.Modal.getOrCreateInstance(editarModalEl).show()
+                }
+                detalleModalEl.addEventListener('hidden.bs.modal', onHidden)
+                detalleModal.hide()
+            } else {
+                bootstrap.Modal.getOrCreateInstance(editarModalEl).show()
+            }
         }
 
         // ═══════════════════════════════════════════════════
@@ -309,6 +327,10 @@
             const textoOriginal = btn.innerHTML
             btn.disabled = true
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
+
+            // Cancelar petición anterior si existe
+            if (_guardarAbortCtrl) _guardarAbortCtrl.abort()
+            _guardarAbortCtrl = new AbortController()
 
             fetch(`/admin/usuarios/${editarId}`, {
                 method: 'PUT',
@@ -325,7 +347,8 @@
                     municipio_id: document.getElementById('edit_municipio_id').value || null,
                     rol_id:       document.getElementById('edit_rol_id').value,
                     estado:       document.getElementById('edit_estado').value,
-                })
+                }),
+                signal: _guardarAbortCtrl.signal
             })
                 .then(r => {
                     if (!r.ok) throw new Error('Error del servidor')

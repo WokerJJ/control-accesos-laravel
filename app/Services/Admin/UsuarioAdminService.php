@@ -70,6 +70,7 @@ class UsuarioAdminService
             ->withQueryString()
             ->through(fn($persona) => (object) [
                 'id'             => $persona->id,
+                'usuario_id'     => $persona->usuario?->id,
                 'nombre_completo'=> $persona->nombre_completo,
                 'doc_identidad'  => $persona->doc_identidad,
                 'celular'        => $persona->celular,           // ← corregido
@@ -98,6 +99,7 @@ class UsuarioAdminService
 
         return (object) [
             'id'              => $persona->id,
+            'usuario_id'      => $persona->usuario?->id,
             'nombre_completo' => $persona->nombre_completo,
             'doc_identidad'   => $persona->doc_identidad,
             'email'           => $persona->email,

@@ -35,6 +35,7 @@ class UsuarioController extends Controller
         if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
             return response()->json([
                 'id'           => $usuario->id,
+                'usuario_id'   => $usuario->usuario_id,
                 'email'        => $usuario->email,
                 'celular'      => $usuario->celular,
                 'direccion'    => $usuario->direccion,
