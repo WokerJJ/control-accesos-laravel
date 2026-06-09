@@ -53,8 +53,28 @@ document.addEventListener('DOMContentLoaded', loadCalendar);
 document.addEventListener('turbo:load', loadCalendar);
 document.addEventListener('turbo:frame-load', loadCalendar);
 
-// Cleanup FullCalendar on Turbo navigation to prevent memory leaks
+// ═══════════════════════════════════════════════
+// Bootstrap Modal accessibility fix (aria-hidden)
+// Blur focused element BEFORE Bootstrap sets aria-hidden
+// ═══════════════════════════════════════════════
+document.addEventListener('hide.bs.modal', (e) => {
+  const modal = e.target;
+  if (modal && document.activeElement && modal.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+});
+
+// ═══════════════════════════════════════════════
+// Turbo cleanup: dispose modals + abort pending fetches
+// ═══════════════════════════════════════════════
 document.addEventListener('turbo:before-render', () => {
+  // Dispose all active Bootstrap modal instances
+  document.querySelectorAll('.modal.show').forEach(modalEl => {
+    const instance = bootstrap.Modal.getInstance(modalEl);
+    if (instance) instance.dispose();
+  });
+
+  // Cleanup FullCalendar
   calendarioModule?.destroyCalendar?.();
 });
 

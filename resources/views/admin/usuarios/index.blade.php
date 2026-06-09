@@ -181,6 +181,7 @@
         </div>`
 
         let editarId = null
+        let _usuariosAbortCtrl = null;
 
         // ═══════════════════════════════════════════════════
         // MODAL DETALLE (carga vía AJAX)
@@ -189,10 +190,15 @@
             const id = e.relatedTarget?.dataset?.id
             if (!id) return
 
+            // Cancelar petición anterior si existe
+            if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
+            _usuariosAbortCtrl = new AbortController();
+
             detalleBody.innerHTML = spinner
 
             fetch(`/admin/usuarios/${id}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: _usuariosAbortCtrl.signal
             })
                 .then(r => {
                     if (!r.ok) throw new Error('Error ' + r.status)
@@ -205,7 +211,8 @@
                     const tooltips = detalleBody.querySelectorAll('[data-bs-toggle="tooltip"]')
                     tooltips.forEach(el => new bootstrap.Tooltip(el))
                 })
-                .catch(() => {
+                .catch(err => {
+                    if (err.name === 'AbortError') return;
                     detalleBody.innerHTML = `
                 <div class="text-center text-danger py-5">
                     <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
@@ -218,6 +225,7 @@
         })
 
         detalleModalEl?.addEventListener('hidden.bs.modal', function () {
+            if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
             detalleBody.innerHTML = spinner
         })
 

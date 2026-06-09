@@ -153,6 +153,8 @@
 
 @push('scripts')
 <script>
+    let _accesosAbortCtrl = null;
+
     function initAccesosModal() {
         const modalEl   = document.getElementById('detalleModal')
         if (!modalEl) return
@@ -172,12 +174,20 @@
             const id  = e.relatedTarget?.dataset?.id
             if (!id) return
 
+            // Cancelar petición anterior si existe
+            if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
+            _accesosAbortCtrl = new AbortController();
+
             modalBody.innerHTML = spinner
 
-            fetch(`/admin/accesos/${id}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            fetch(`/admin/accesos/${id}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: _accesosAbortCtrl.signal
+            })
                 .then(r => r.text())
                 .then(html => { modalBody.innerHTML = html })
-                .catch(() => {
+                .catch(err => {
+                    if (err.name === 'AbortError') return;
                     modalBody.innerHTML = `
                     <div class="text-center text-danger py-4">
                         <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
@@ -187,6 +197,7 @@
         })
 
         modalEl.addEventListener('hidden.bs.modal', function () {
+            if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
             modalBody.innerHTML = spinner
         })
     }

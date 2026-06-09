@@ -94,7 +94,6 @@ Route::prefix('admin')
             ->name('accesos.show');
         Route::get('/usuarios', [UsuarioController::class, 'index'])
             ->name('usuarios.index');
-        Route::get('/usuarios',          [UsuarioController::class, 'index'])->name('usuarios.index');
         Route::get('/usuarios/{id}',     [UsuarioController::class, 'show'])->name('usuarios.show');
         Route::put('/usuarios/{id}',     [UsuarioController::class, 'update'])->name('usuarios.update');
         Route::get('/casilleros', [CasilleroController::class, 'index'])
@@ -107,7 +106,6 @@ Route::prefix('admin')
                     ->name('index');
                 Route::post('/', 'programar')
                     ->name('programar');
-                Route::post('programar','programar')->name('programar');
                 Route::put('{actividad}', 'actualizar')->name('actualizar');
                 Route::delete('{actividad}','eliminar')->name('eliminar');
             });
