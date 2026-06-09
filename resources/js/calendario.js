@@ -22,12 +22,13 @@ const ROUTE_UPDATE = window.routeActualizar
 const ROUTE_DELETE = window.routeEliminar
 
 let calendarInstance = null
+let resizeHandler = null
 
 // ═══════════════════════════════════════════════
 // Bootstrap (Turbo-compatible)
 // ═══════════════════════════════════════════════
 
-function initCalendar() {
+export function initCalendar() {
     // Destruir instancia anterior si existe (al navegar con Turbo)
     if (calendarInstance) {
         calendarInstance.destroy()
@@ -250,23 +251,33 @@ function initCalendar() {
         calendar.render()
     } finally {
         calendarInstance = calendar
-        // Ocultar spinner y mostrar calendario
+        // Ocultar spinner
         const loadingEl = document.getElementById('calendar-loading')
         if (loadingEl) loadingEl.remove()
-        calendarEl.style.display = ''
+        // Mostrar calendario y forzar recálculo de dimensiones
+        requestAnimationFrame(() => {
+            calendarEl.style.visibility = 'visible'
+            calendar.updateSize()
+        })
     }
 
+    // Limpiar listener anterior para evitar leaks entre navegaciones Turbo
+    if (resizeHandler) window.removeEventListener('resize', resizeHandler)
     let resizeTimer = null
-    window.addEventListener('resize', () => {
+    resizeHandler = () => {
         clearTimeout(resizeTimer)
         resizeTimer = setTimeout(() => {
             const view = getView()
             if (calendar.view.type !== view) calendar.changeView(view)
             calendar.setOption('headerToolbar', getToolbar())
         }, 200)
-    })
+    }
+    window.addEventListener('resize', resizeHandler)
 }
 
-// Soporte para Turbo: init en DOMContentLoaded Y en turbo:load
-document.addEventListener('DOMContentLoaded', initCalendar)
-document.addEventListener('turbo:load', initCalendar)
+export function destroyCalendar() {
+    if (calendarInstance) {
+        calendarInstance.destroy()
+        calendarInstance = null
+    }
+}

@@ -15,21 +15,21 @@
 
     <div class="card-body p-2">
 
-        <x-info-box
+        <x-shared.info-box
             color="success"
             icon="fas fa-lock-open"
             label="Libres"
             :value="$stats['libres']"
         />
 
-        <x-info-box
+        <x-shared.info-box
             color="danger"
             icon="fas fa-lock"
             label="Ocupados"
             :value="$stats['ocupados']"
         />
 
-        <x-info-box
+        <x-shared.info-box
             color="info"
             icon="fas fa-boxes"
             label="Total"

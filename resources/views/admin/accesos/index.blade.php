@@ -53,103 +53,98 @@
             </div>
         </div>
     </x-slot:campos>
-</x-dashboard.filtro-card>
-
-{{-- ── Tabla ── --}}
-<div class="card card-outline card-secondary">
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-list mr-2"></i>Accesos registrados
-        </h3>
-        <div class="card-tools">
-            <span class="badge bg-secondary">{{ $accesos->total() }} registros</span>
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover table-striped align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th>Persona</th>
-                    <th>Documento</th>
-                    <th>Actividad</th>
-                    <th>Ingreso</th>
-                    <th>Salida</th>
-                    <th>Duración</th>
-                    <th>Estado</th>
-                    <th width="60"></th>
-                </tr>
-                </thead>
-                <tbody>
-                @forelse($accesos as $acceso)
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-user-circle fa-lg text-secondary mr-2"></i>
-                            <span>{{ $acceso->persona->nombre_completo }}</span>
-                        </div>
-                    </td>
-                    <td><small class="text-muted">{{ $acceso->persona->doc_identidad }}</small></td>
-                    <td>{{ $acceso->actividad->nombre }}</td>
-                    <td>
-                            <span title="{{ $acceso->hora_ingreso }}">
-                                {{ $acceso->hora_ingreso?->format('d/m H:i') ?? '—' }}
-                            </span>
-                    </td>
-                    <td>{{ $acceso->hora_salida?->format('d/m H:i') ?? '—' }}</td>
-                    <td>
-                        @if($acceso->hora_salida)
-                        <small class="text-muted">
-                            {{ $acceso->hora_ingreso->diffForHumans($acceso->hora_salida, true) }}
-                        </small>
-                        @elseif($acceso->estado === 'en_curso')
-                        <small class="text-success">
-                            <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
-                            {{ $acceso->hora_ingreso->diffForHumans(null, true) }}
-                        </small>
-                        @else
-                        <span class="text-muted">—</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if($acceso->estado === 'en_curso')
-                        <span class="badge bg-success">
-                                    <i class="fas fa-circle mr-1" style="font-size:7px;"></i>En curso
-                                </span>
-                        @else
-                        <span class="badge bg-secondary">
-                                    <i class="fas fa-check mr-1"></i>Completado
-                                </span>
-                        @endif
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#detalleModal"
-                                data-id="{{ $acceso->id }}"
-                                title="Ver detalle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="8">
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                            No hay accesos registrados con estos filtros
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+</x-dashboard.filtro-card>{{-- ── Tabla ── --}}
+<x-admin.data-table
+    icon="fas fa-list"
+    title="Accesos registrados"
+    variant="secondary"
+    :count="$accesos->total()"
+    count-label="registros"
+    striped
+    align
+>
     @if($accesos->hasPages())
-    <div class="card-footer">{{ $accesos->links() }}</div>
+    <x-slot:footer>
+        {{ $accesos->links() }}
+    </x-slot:footer>
     @endif
-</div>
+
+    <thead class="table-light">
+    <tr>
+        <th>Persona</th>
+        <th>Documento</th>
+        <th>Actividad</th>
+        <th>Ingreso</th>
+        <th>Salida</th>
+        <th>Duración</th>
+        <th>Estado</th>
+        <th width="60"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @forelse($accesos as $acceso)
+    <tr>
+        <td>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-user-circle fa-lg text-secondary mr-2"></i>
+                <span>{{ $acceso->persona->nombre_completo }}</span>
+            </div>
+        </td>
+        <td><small class="text-muted">{{ $acceso->persona->doc_identidad }}</small></td>
+        <td>{{ $acceso->actividad->nombre }}</td>
+        <td>
+            <span title="{{ $acceso->hora_ingreso }}">
+                {{ $acceso->hora_ingreso?->format('d/m H:i') ?? '—' }}
+            </span>
+        </td>
+        <td>{{ $acceso->hora_salida?->format('d/m H:i') ?? '—' }}</td>
+        <td>
+            @if($acceso->hora_salida)
+            <small class="text-muted">
+                {{ $acceso->hora_ingreso->diffForHumans($acceso->hora_salida, true) }}
+            </small>
+            @elseif($acceso->estado === 'en_curso')
+            <small class="text-success">
+                <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
+                {{ $acceso->hora_ingreso->diffForHumans(null, true) }}
+            </small>
+            @else
+            <span class="text-muted">—</span>
+            @endif
+        </td>
+        <td>
+            @if($acceso->estado === 'en_curso')
+            <span class="badge bg-success">
+                <i class="fas fa-circle mr-1" style="font-size:7px;"></i>En curso
+            </span>
+            @else
+            <span class="badge bg-secondary">
+                <i class="fas fa-check mr-1"></i>Completado
+            </span>
+            @endif
+        </td>
+        <td>
+            <button class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#detalleModal"
+                    data-id="{{ $acceso->id }}"
+                    title="Ver detalle">
+                <i class="fas fa-eye"></i>
+            </button>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="8">
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                No hay accesos registrados con estos filtros
+            </div>
+        </td>
+    </tr>
+    @endforelse
+    </tbody>
+</x-admin.data-table>
 
 {{-- ── Modal detalle ── --}}
 <x-admin.acceso-detalle-modal />
@@ -158,9 +153,10 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-
+    function initAccesosModal() {
         const modalEl   = document.getElementById('detalleModal')
+        if (!modalEl) return
+
         const modalBody = document.getElementById('detalleModalBody')
         const spinner   = `
         <div class="text-center text-muted py-4">
@@ -168,13 +164,17 @@
             Cargando...
         </div>`
 
+        // Evitar duplicar listeners en re-inicializaciones Turbo
+        if (modalEl._accesosInit) return
+        modalEl._accesosInit = true
+
         modalEl.addEventListener('show.bs.modal', function (e) {
-            const id  = e.relatedTarget.dataset.id
-            const url = `/admin/accesos/${id}`
+            const id  = e.relatedTarget?.dataset?.id
+            if (!id) return
 
             modalBody.innerHTML = spinner
 
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            fetch(`/admin/accesos/${id}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(r => r.text())
                 .then(html => { modalBody.innerHTML = html })
                 .catch(() => {
@@ -189,7 +189,10 @@
         modalEl.addEventListener('hidden.bs.modal', function () {
             modalBody.innerHTML = spinner
         })
+    }
 
-    })
+    document.addEventListener('DOMContentLoaded', initAccesosModal)
+    document.addEventListener('turbo:load', initAccesosModal)
+    document.addEventListener('turbo:frame-load', initAccesosModal)
 </script>
 @endpush

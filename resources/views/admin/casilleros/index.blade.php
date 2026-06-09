@@ -17,14 +17,14 @@
 
 <div class="row">
     <div class="col-lg-9" id="contenedor-mapa">
-        <x-admin-casilleros-mapa :mapa="$mapa" />
+        <x-admin.casilleros-mapa :mapa="$mapa" />
     </div>
     <div class="col-lg-3">
-        <x-admin-casilleros-resumen :stats="$stats" />
+        <x-admin.casilleros-resumen :stats="$stats" />
     </div>
 </div>
 
-<x-admin-casilleros-modal-detalle />
+<x-admin.casilleros-modal-detalle />
 
 @endsection
 

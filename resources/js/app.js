@@ -33,29 +33,36 @@ window.Chart = Chart;
 // Calendar lazy loading (Turbo-compatible)
 // ═══════════════════════════════════════════════
 
-function loadCalendar() {
-  if (document.getElementById('calendar')) {
-    import('./calendario.js');
+let calendarioModule = null;
+
+async function loadCalendar() {
+  const calendarEl = document.getElementById('calendar');
+  if (!calendarEl) return;
+
+  // Skip if calendar is already rendered in this DOM (prevents double init on first load)
+  if (calendarEl.querySelector('.fc')) return;
+
+  if (!calendarioModule) {
+    calendarioModule = await import('./calendario.js');
   }
+
+  calendarioModule.initCalendar();
 }
 
 document.addEventListener('DOMContentLoaded', loadCalendar);
 document.addEventListener('turbo:load', loadCalendar);
 document.addEventListener('turbo:frame-load', loadCalendar);
 
-// ═══════════════════════════════════════════════
-// AdminLTE sidebar (Turbo-compatible via delegation)
-// Uses event delegation on document — persists across Turbo navigations
-// ═══════════════════════════════════════════════
-
-// Sidebar toggle (hamburger button)
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-lte-toggle="sidebar"]');
-  if (!btn) return;
-  e.preventDefault();
-  document.body.classList.toggle('sidebar-collapse');
-  document.body.classList.toggle('sidebar-open');
+// Cleanup FullCalendar on Turbo navigation to prevent memory leaks
+document.addEventListener('turbo:before-render', () => {
+  calendarioModule?.destroyCalendar?.();
 });
+
+// ═══════════════════════════════════════════════
+// AdminLTE sidebar
+// Handled natively by adminlte.min.js via data-lte-toggle="sidebar"
+// No custom handler needed — it conflicts with AdminLTE's built-in logic
+// ═══════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════
 // Character counters for inputs with maxlength

@@ -100,7 +100,7 @@ class AppServiceProvider extends ServiceProvider
             ]
         ];
 
-        View::composer('components.admin-sidebar', function ($view) use ($menu) {
+        View::composer('components.admin.sidebar', function ($view) use ($menu) {
             $view->with('menu', $menu);
         });
     }

@@ -37,10 +37,26 @@ fi
 
 # ── Wait for MySQL ────────────────────────────
 echo "Esperando a que MySQL este listo..."
-until php -r "new PDO('mysql:host=${DB_HOST:-db};port=${DB_PORT:-3306}', '${DB_USERNAME:-control_accesos}', '${DB_PASSWORD:-secret}');" 2>/dev/null; do
+MAX_RETRIES=30
+RETRY=0
+set +e  # Evitar que set -e mate el script dentro del while
+while [ $RETRY -lt $MAX_RETRIES ]; do
+    MYSQL_ERR=$(php -r "new PDO('mysql:host=${DB_HOST:-db};port=${DB_PORT:-3306}', '${DB_USERNAME:-control_accesos}', '${DB_PASSWORD:-secret}');" 2>&1)
+    if [ $? -eq 0 ]; then
+        echo "MySQL listo!"
+        break
+    fi
+    RETRY=$((RETRY + 1))
+    echo "Intento $RETRY/$MAX_RETRIES — MySQL no listo, esperando 2s..."
     sleep 2
 done
-echo "MySQL listo!"
+set -e  # Restaurar set -e
+
+if [ $RETRY -eq $MAX_RETRIES ]; then
+    echo "ERROR: No se pudo conectar a MySQL despues de $MAX_RETRIES intentos."
+    echo "Ultimo error: $MYSQL_ERR"
+    exit 1
+fi
 
 # ── Wipe DB and run fresh migrations ──────────
 echo "Limpiando y recreando base de datos..."

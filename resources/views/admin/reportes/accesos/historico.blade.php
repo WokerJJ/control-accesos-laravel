@@ -138,12 +138,12 @@
     </div>
 
     {{-- ── Tabla histórico ─────────────────────────── --}}
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-history mr-2"></i>Accesos del período
-                <span class="badge bg-primary ms-1">{{ $accesos->total() }}</span>
-            </h3>
+    <x-admin.data-table
+        icon="fas fa-history"
+        title="Accesos del período"
+        :count="$accesos->total()"
+    >
+        <x-slot:tools>
             <div class="d-flex justify-content-end gap-1">
                 <a href="{{ route('admin.reportes.export.historico.csv', request()->query()) }}"
                    class="btn btn-sm btn-success export-btn" data-turbo="false">
@@ -154,65 +154,61 @@
                     <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                 </a>
             </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Persona</th>
-                        <th>Documento</th>
-                        <th>Actividad</th>
-                        <th>Locación</th>
-                        <th>Ingreso</th>
-                        <th>Salida</th>
-                        <th>Duración</th>
-                        <th>Método</th>
-                        <th>Estado</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($accesos as $acceso)
-                    <tr>
-                        <td>
-                            {{ $acceso->persona->primer_nombre }}
-                            {{ $acceso->persona->primer_apellido }}
-                        </td>
-                        <td>
-                            <small class="text-muted">{{ $acceso->persona->doc_identidad }}</small>
-                        </td>
-                        <td>{{ $acceso->actividad->nombre }}</td>
-                        <td>{{ $acceso->locacion->nombre }}</td>
-                        <td>{{ $acceso->hora_ingreso?->format('d/m/Y H:i') }}</td>
-                        <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
-                        <td>{{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}</td>
-                        <td>
-                                <span class="badge bg-secondary">
-                                    {{ ucfirst($acceso->metodo_acceso) }}
-                                </span>
-                        </td>
-                        <td>
-                                <span class="badge bg-{{ $acceso->estado === 'en_curso' ? 'success' : 'secondary' }}">
-                                    {{ $acceso->estado === 'en_curso' ? 'En curso' : 'Completado' }}
-                                </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                            Sin accesos en el período seleccionado
-                        </td>
-                    </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer">
+        </x-slot:tools>
+
+        <x-slot:footer>
             {{ $accesos->links() }}
-        </div>
-    </div>
+        </x-slot:footer>
+
+        <thead class="table-light">
+        <tr>
+            <th>Persona</th>
+            <th>Documento</th>
+            <th>Actividad</th>
+            <th>Locación</th>
+            <th>Ingreso</th>
+            <th>Salida</th>
+            <th>Duración</th>
+            <th>Método</th>
+            <th>Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        @forelse($accesos as $acceso)
+        <tr>
+            <td>
+                {{ $acceso->persona->primer_nombre }}
+                {{ $acceso->persona->primer_apellido }}
+            </td>
+            <td>
+                <small class="text-muted">{{ $acceso->persona->doc_identidad }}</small>
+            </td>
+            <td>{{ $acceso->actividad->nombre }}</td>
+            <td>{{ $acceso->locacion->nombre }}</td>
+            <td>{{ $acceso->hora_ingreso?->format('d/m/Y H:i') }}</td>
+            <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
+            <td>{{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}</td>
+            <td>
+                <span class="badge bg-secondary">
+                    {{ ucfirst($acceso->metodo_acceso) }}
+                </span>
+            </td>
+            <td>
+                <span class="badge bg-{{ $acceso->estado === 'en_curso' ? 'success' : 'secondary' }}">
+                    {{ $acceso->estado === 'en_curso' ? 'En curso' : 'Completado' }}
+                </span>
+            </td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="9" class="text-center text-muted py-4">
+                <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                Sin accesos en el período seleccionado
+            </td>
+        </tr>
+        @endforelse
+        </tbody>
+</x-admin.data-table>
 
 </div>
 @endsection

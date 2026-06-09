@@ -15,13 +15,20 @@
         {{-- Usuario --}}
         <div class="px-3 py-3 border-bottom border-secondary">
             <div class="d-flex align-items-center">
-                <i class="fas fa-user-circle fa-2x text-secondary"></i>
-                <div class="ms-2">
-                    <div class="text-white small fw-light">
+                @php
+                    $u = Auth::user()->persona;
+                    $iniciales = strtoupper(substr($u->primer_nombre ?? 'X', 0, 1) . substr($u->primer_apellido ?? 'X', 0, 1));
+                @endphp
+                <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                     style="width:38px;height:38px;background:linear-gradient(135deg,#0d6efd,#6610f2);font-size:14px;font-weight:700;color:#fff;letter-spacing:1px;">
+                    {{ $iniciales }}
+                </div>
+                <div class="ms-2 overflow-hidden">
+                    <div class="text-white small fw-semibold text-truncate">
                         {{ Auth::user()->persona->primer_nombre }}
                         {{ Auth::user()->persona->primer_apellido }}
                     </div>
-                    <span class="badge text-bg-success mt-1">
+                    <span class="badge text-bg-light text-dark mt-1" style="font-size:.65rem;">
                         {{ Auth::user()->rol->nombre }}
                     </span>
                 </div>

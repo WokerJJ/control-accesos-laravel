@@ -29,10 +29,10 @@
             <p class="text-muted mb-0">Cargando calendario...</p>
         </div>
 
-        <div id="calendar" style="display:none;"></div>
+        <div id="calendar" style="visibility:hidden;"></div>
 
     </div>
 
-    <x-admin-actividades-modal-crear :locaciones="$locaciones" :tipos-actividad="$tiposActividad" />
+    <x-admin.actividades-modal-crear :locaciones="$locaciones" :tipos-actividad="$tiposActividad" />
 
 </div>

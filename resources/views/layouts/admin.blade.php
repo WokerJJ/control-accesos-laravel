@@ -15,8 +15,8 @@
 <body class="layout-fixed sidebar-expand-lg sidebar-mini">
 <div class="app-wrapper">
 
-    <x-admin-navbar />
-    <x-admin-sidebar />
+    <x-admin.navbar />
+    <x-admin.sidebar />
 
     <main class="app-main">
 
@@ -40,7 +40,7 @@
 
         <div class="app-content">
             <div class="container-fluid">
-                <x-alerta></x-alerta>
+                <x-shared.alerta />
                 <turbo-frame id="main" style="display: contents;">
                 @yield('content')
             </turbo-frame>

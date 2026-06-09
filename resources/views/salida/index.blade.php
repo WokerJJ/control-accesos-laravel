@@ -30,45 +30,45 @@
         <div class="row mb-2">
 
             <div class="col-6 mb-3">
-                <x-info-box
+                <x-shared.info-box
                     icon="fas fa-running"
                     color="primary"
                     label="Actividad"
-                    :value="$acceso->actividad->nombre"></x-info-box>
+                    :value="$acceso->actividad->nombre"></x-shared.info-box>
             </div>
 
             @if($acceso->locacion)
             <div class="col-6 mb-3">
-                <x-info-box
+                <x-shared.info-box
                     icon="fas fa-map-marker-alt"
                     color="info"
                     label="Locación"
-                    :value="$acceso->locacion->nombre"></x-info-box>
+                    :value="$acceso->locacion->nombre"></x-shared.info-box>
             </div>
             @endif
 
             <div class="col-6 mb-3">
-                <x-info-box
+                <x-shared.info-box
                     icon="fas fa-clock"
                     color="success"
                     label="Ingreso"
-                    :value="$acceso->hora_ingreso?->format('h:i A') ?? '—'"></x-info-box>
+                    :value="$acceso->hora_ingreso?->format('h:i A') ?? '—'"></x-shared.info-box>
             </div>
 
             <div class="col-6 mb-3">
-                <x-info-box
+                <x-shared.info-box
                     icon="fas fa-hourglass-half"
                     color="warning"
                     label="Tiempo"
-                    :value="$acceso->hora_ingreso?->diffForHumans(null, true) ?? '—'"></x-info-box>
+                    :value="$acceso->hora_ingreso?->diffForHumans(null, true) ?? '—'"></x-shared.info-box>
             </div>
 
             <div class="col-6 mb-3">
-                <x-info-box
+                <x-shared.info-box
                     icon="fas fa-hourglass-half"
                     color="primary"
                     label="Casillero"
-                    :value="optional($acceso->casillero)->codigo ?? '—'"></x-info-box>
+                    :value="optional($acceso->casillero)->codigo ?? '—'"></x-shared.info-box>
             </div>
 
         </div>

@@ -67,15 +67,17 @@
     </x-dashboard.filtro-card>
 
     {{-- Tabla --}}
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0"><i class="fas fa-users me-2"></i>Usuarios registrados</h3>
-            <span class="badge bg-secondary">{{ $usuarios->total() }} resultados</span>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0">
-                    <thead class="table-dark">
+    <x-admin.data-table
+        icon="fas fa-users"
+        title="Usuarios registrados"
+        :count="$usuarios->total()"
+        count-label="resultados"
+        variant="secondary"
+        striped
+        align
+        shadow
+    >
+    <thead class="table-dark">
                     <tr>
                         <th>Persona</th>
                         <th>Documento</th>
@@ -143,14 +145,14 @@
                     </tr>
                     @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer d-flex justify-content-between align-items-center">
+    <x-slot:footer>
+        <div class="d-flex justify-content-between align-items-center">
             <small class="text-muted">Mostrando {{ $usuarios->firstItem() ?? 0 }} - {{ $usuarios->lastItem() ?? 0 }} de {{ $usuarios->total() }}</small>
             {{ $usuarios->withQueryString()->links() }}
         </div>
-    </div>
+    </x-slot:footer>
+
+</x-admin.data-table>
 
 </div>
 
@@ -160,9 +162,14 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-
+    function initUsuariosModals() {
         const detalleModalEl = document.getElementById('detalleModal')
+        if (!detalleModalEl) return
+
+        // Evitar duplicar listeners en re-inicializaciones Turbo
+        if (detalleModalEl._usuariosInit) return
+        detalleModalEl._usuariosInit = true
+
         const editarModalEl  = document.getElementById('editarModal')
         const detalleBody    = document.getElementById('detalleModalBody')
         const spinner        = `
@@ -348,6 +355,10 @@
             document.body.appendChild(toast)
             setTimeout(() => toast.remove(), 3000)
         }
-    })
+    }
+
+    document.addEventListener('DOMContentLoaded', initUsuariosModals)
+    document.addEventListener('turbo:load', initUsuariosModals)
+    document.addEventListener('turbo:frame-load', initUsuariosModals)
 </script>
 @endpush

@@ -11,7 +11,7 @@
 - [Requisitos Previos](#-requisitos-previos)
 - [Instalación](#-instalación)
 - [Configuración de Entorno](#-configuración-de-entorno)
-- [Ejecución del Proyecto](#-ejecución-del-proyecto)
+- [Docker](#-docker)
 - [Pruebas y Calidad de Código](#-pruebas-y-calidad-de-código)
 - [Despliegue (Opcional)](#-despliegue-opcional)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
@@ -60,52 +60,6 @@ El sistema permite a los administradores:
 
 ---
 
-## 📋 Requisitos Previos
-
-| Herramienta | Versión mínima |
-|-------------|----------------|
-| **PHP** | 8.3 |
-| **Composer** | 2.5+ |
-| **Node.js** | 20.x |
-| **npm** | 10.x |
-| **MySQL** | 8.0 (o SQLite para pruebas locales) |
-| **Git** | 2.40+ |
-
----
-
-## 🔧 Instalación
-
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/tu-usuario/control-accesos.git
-   cd control-accesos
-   ```
-
-2. **Instalar dependencias PHP y Node**
-   ```bash
-   composer install
-   npm install
-   ```
-
-3. **Configurar variables de entorno**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-4. **Crear la base de datos y migrar**
-   ```bash
-   php artisan migrate
-   php artisan db:seed   # Opcional: poblar con datos de prueba
-   ```
-
-5. **Compilar assets (modo desarrollo)**
-   ```bash
-   npm run dev
-   ```
-
----
-
 ## ⚙️ Configuración de Entorno
 
 Edita el archivo `.env` con los valores correspondientes a tu entorno:
@@ -131,30 +85,155 @@ MAIL_ENCRYPTION=null
 
 ---
 
-## 🚀 Ejecución del Proyecto
+## 🐳 Docker
 
-- **Servidor de desarrollo**
-  ```bash
-  php artisan serve
-  ```
+El proyecto incluye una configuración completa de Docker con **multi-stage build** que levanta la aplicación junto con una base de datos MySQL 8.0 listos para usar.
 
-- **Cola de procesamiento (si usas colas)**
-  ```bash
-  php artisan queue:work --tries=1 --timeout=0
-  ```
+### Requisitos
 
-- **Herramientas de ayuda**
-  ```bash
-  php artisan pail            # Panel de logs y depuración
-  php artisan config:clear    # Limpiar caché de configuración
-  ```
+- [Docker](https://docs.docker.com/get-docker/) ≥ 24.x
+- [Docker Compose](https://docs.docker.com/compose/install/) ≥ 2.x (incluido en Docker Desktop)
 
-- **Compilación para producción**
-  ```bash
-  npm run build
-  ```
+### Inicio rápido
 
----
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/control-accesos.git
+cd control-accesos
+
+# 2. Levantar contenedores (construye la imagen la primera vez)
+docker compose up -d
+
+# 3. Listo! Abrir en el navegador
+# http://localhost:8000
+```
+
+> **Nota:** La primera ejecución tarda entre 2-5 minutos mientras se construyen las imágenes (Node.js para assets, Composer para dependencias PHP, y la imagen final con PHP 8.3 + Apache).
+
+### Qué hace el entrypoint automáticamente
+
+El archivo `docker-entrypoint.sh` ejecuta los siguientes pasos al iniciar el contenedor:
+
+1. **Crea el archivo `.env`** con las variables de entorno configuradas en `docker-compose.yml` (si no existe).
+2. **Genera `APP_KEY`** automáticamente.
+3. **Espera a que MySQL esté listo** antes de continuar.
+4. **Ejecuta `migrate:fresh`** para crear todas las tablas y poblar los datos de prueba (seeders).
+5. **Crea el symlink** de `storage:link` y limpia cachés.
+
+> ⚠️ **Importante:** El entrypoint ejecuta `migrate:fresh`, lo que **elimina y recrea** la base de datos en cada inicio. Esto es intencional para desarrollo. Si necesitas preservar datos, modifica el entrypoint.
+
+### Arquitectura de contenedores
+
+```
+┌─────────────────────────────────────┐
+│           Docker Compose            │
+├──────────────────┬──────────────────┤
+│   app:8000→80    │     db:3306      │
+│   PHP 8.3+Apache │   MySQL 8.0      │
+│   Laravel app    │   DB: control_   │
+│                  │   accesos        │
+└──────────────────┴──────────────────┘
+```
+
+| Servicio | Puerto | Descripción |
+|----------|--------|-------------|
+| **app** | `localhost:8000` | Aplicación Laravel (PHP + Apache) |
+| **db** | `localhost:3306` | Base de datos MySQL 8.0 |
+
+### Variables de entorno (Docker)
+
+Las variables se configuran en `docker-compose.yml` dentro del servicio `app`:
+
+```yaml
+environment:
+  DB_HOST: db          # Nombre del servicio Docker
+  DB_PORT: 3306
+  DB_DATABASE: control_accesos
+  DB_USERNAME: control_accesos
+  DB_PASSWORD: secret
+```
+
+### Comandos útiles
+
+```bash
+# Ver logs de la aplicación
+docker compose logs -f app
+
+# Ver logs de MySQL
+docker compose logs -f db
+
+# Ejecutar Artisan dentro del contenedor
+docker compose exec app php artisan <comando>
+
+# Ejecutar una migración manual
+docker compose exec app php artisan migrate
+
+# Acceder al contenedor de la app
+docker compose exec app bash
+
+# Acceder a MySQL directamente
+docker compose exec db mysql -u control_accesos -psecret control_accesos
+
+# Detener todos los contenedores
+docker compose down
+
+# Detener y eliminar volúmenes (limpiar datos)
+docker compose down -v
+
+# Reconstruir imágenes (después de cambios en Dockerfile)
+docker compose up -d --build
+```
+
+### Conexión externa a MySQL
+
+Si necesitas conectarte a la base de datos desde una herramienta externa (MySQL Workbench, DBeaver, etc.):
+
+| Parámetro | Valor |
+|-----------|-------|
+| Host | `127.0.0.1` |
+| Port | `3306` |
+| Database | `control_accesos` |
+| Username | `control_accesos` |
+| Password | `secret` |
+
+### Solucionar conflicto de puerto MySQL
+
+Si el puerto `3306` ya está en uso (por otra instancia de MySQL local), cambia el mapeo de puertos en `docker-compose.yml`:
+
+1. **Modificar el puerto en `docker-compose.yml`:**
+
+```yaml
+services:
+  db:
+    ports:
+      - "3307:3306"   # Usar 3307 (o cualquier puerto libre) en vez de 3306
+```
+
+2. **Actualizar la variable `DB_PORT` en la sección `environment` del servicio `app`:**
+
+```yaml
+services:
+  app:
+    environment:
+      DB_HOST: db
+      DB_PORT: 3307     # Debe coincidir con el puerto externo configurado arriba
+      DB_DATABASE: control_accesos
+      DB_USERNAME: control_accesos
+      DB_PASSWORD: secret
+```
+
+3. **Actualizar la conexión externa (si usas MySQL Workbench o similar):**
+
+   - Port: `3307` (o el que hayas elegido)
+
+4. **Reiniciar los contenedores:**
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+> **Nota:** El puerto `3306` dentro del contenedor de MySQL **no se cambia**. Solo se modifica el mapeo externo (`HOST:CONTAINER`).
 
 ## 🧪 Pruebas y Calidad de Código
 
@@ -177,7 +256,7 @@ php artisan test
 Para entornos de producción puedes considerar:
 
 - **Laravel Forge** o **Vapor** para despliegues en servidores gestionados.
-- **Docker**: usar el `Dockerfile` disponible en la raíz del proyecto.
+- **Docker**: consulta la sección [Docker](#-docker) para la configuración completa.
 - **Servidor Nginx/Apache**: configurar virtual host apuntando a `public/`.
 
 ---
@@ -188,7 +267,7 @@ El proyecto sigue la convención de Laravel, organizada en directorios lógicos:
 
 ### 📁 `app/`
 - **Http/Controllers/**:
-  - **Admin/**: controladores del panel administrativo (`UsuarioController`, `ActividadController`, `AccesoController`, etc.).
+- **Admin/**: controladores del panel administrativo (`UsuarioController`, `ActividadController`, `AccesoController`, etc.).
 - **Models/**: cada entidad del dominio (ej. `Acceso.php`, `Actividad.php`, `Persona.php`, `Usuario.php`).
 - **Services/**: lógica de negocio segmentada (`AccesoService.php`, `CalificacionService.php`, `IngresoService.php`, etc.).
 - **Providers/AppServiceProvider.php**: registro de servicios y eventos.

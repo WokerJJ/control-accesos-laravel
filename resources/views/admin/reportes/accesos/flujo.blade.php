@@ -125,106 +125,96 @@
 
         {{-- Franjas horarias --}}
         <div class="col-md-4">
-            <div class="card card-outline card-primary h-100">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-th-large mr-2"></i>Franjas horarias
-                    </h3>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Franja</th>
-                            <th class="text-end">Ingresos</th>
-                            <th class="text-end">%</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($flujo['franjas'] as $franja)
-                        @php
-                        $pct = $flujo['total'] > 0
-                        ? round($franja['total'] * 100 / $flujo['total'])
-                        : 0;
-                        @endphp
-                        <tr>
-                            <td>{{ $franja['nombre'] }}</td>
-                            <td class="text-end fw-bold">{{ $franja['total'] }}</td>
-                            <td class="text-end">
-                                <div class="d-flex align-items-center justify-content-end gap-1">
-                                    <div class="progress flex-grow-1" style="height:6px; min-width:50px;">
-                                        <div class="progress-bar bg-primary"
-                                             style="width:{{ $pct }}%"></div>
-                                    </div>
-                                    <small class="text-muted">{{ $pct }}%</small>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <x-admin.data-table
+                icon="fas fa-th-large"
+                title="Franjas horarias"
+                hover
+                full-height
+            >
+            <thead class="table-light">
+            <tr>
+                <th>Franja</th>
+                <th class="text-end">Ingresos</th>
+                <th class="text-end">%</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($flujo['franjas'] as $franja)
+            @php
+            $pct = $flujo['total'] > 0
+            ? round($franja['total'] * 100 / $flujo['total'])
+            : 0;
+            @endphp
+            <tr>
+                <td>{{ $franja['nombre'] }}</td>
+                <td class="text-end fw-bold">{{ $franja['total'] }}</td>
+                <td class="text-end">
+                    <div class="d-flex align-items-center justify-content-end gap-1">
+                        <div class="progress flex-grow-1" style="height:6px; min-width:50px;">
+                            <div class="progress-bar bg-primary"
+                                 style="width:{{ $pct }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ $pct }}%</small>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+            </x-admin.data-table>
         </div>
 
         {{-- Detalle por hora --}}
         <div class="col-md-8">
-            <div class="card card-outline card-primary h-100">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-table mr-2"></i>Detalle por hora
-                    </h3>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead class="table-light sticky-top">
-                            <tr>
-                                <th>Hora</th>
-                                <th class="text-center">Ingresos</th>
-                                <th class="text-center">Salidas</th>
-                                <th>Volumen</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($flujo['labels'] as $i => $hora)
-                            @php
-                            $ing = $flujo['ingresos'][$i];
-                            $sal = $flujo['salidas'][$i];
-                            $max = max(array_merge($flujo['ingresos'], [1]));
-                            $pct = round($ing * 100 / $max);
-                            @endphp
-                            <tr class="{{ $ing > 0 ? '' : 'text-muted' }}">
-                                <td>{{ $hora }}</td>
-                                <td class="text-end">
-                                    @if($ing > 0)
-                                    <span class="badge bg-primary">{{ $ing }}</span>
-                                    @else
-                                    <span class="text-muted">—</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    @if($sal > 0)
-                                    <span class="badge bg-secondary">{{ $sal }}</span>
-                                    @else
-                                    <span class="text-muted">—</span>
-                                    @endif
-                                </td>
-                                <td style="min-width:100px;">
-                                    @if($ing > 0)
-                                    <div class="progress" style="height:6px;">
-                                        <div class="progress-bar bg-primary"
-                                             style="width:{{ $pct }}%"></div>
-                                    </div>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
+            <x-admin.data-table
+                icon="fas fa-table"
+                title="Detalle por hora"
+                hover
+                small
+            >
+            <thead class="table-light sticky-top">
+            <tr>
+                <th>Hora</th>
+                <th class="text-center">Ingresos</th>
+                <th class="text-center">Salidas</th>
+                <th>Volumen</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($flujo['labels'] as $i => $hora)
+            @php
+            $ing = $flujo['ingresos'][$i];
+            $sal = $flujo['salidas'][$i];
+            $max = max(array_merge($flujo['ingresos'], [1]));
+            $pct = round($ing * 100 / $max);
+            @endphp
+            <tr class="{{ $ing > 0 ? '' : 'text-muted' }}">
+                <td>{{ $hora }}</td>
+                <td class="text-end">
+                    @if($ing > 0)
+                    <span class="badge bg-primary">{{ $ing }}</span>
+                    @else
+                    <span class="text-muted">—</span>
+                    @endif
+                </td>
+                <td class="text-end">
+                    @if($sal > 0)
+                    <span class="badge bg-secondary">{{ $sal }}</span>
+                    @else
+                    <span class="text-muted">—</span>
+                    @endif
+                </td>
+                <td style="min-width:100px;">
+                    @if($ing > 0)
+                    <div class="progress" style="height:6px;">
+                        <div class="progress-bar bg-primary"
+                             style="width:{{ $pct }}%"></div>
                     </div>
-                </div>
-            </div>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+            </x-admin.data-table>
         </div>
 
     </div>

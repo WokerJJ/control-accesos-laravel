@@ -52,7 +52,7 @@
         </div>
     @endif
 
-<x-footer-public />
+<x-shared.footer />
 
 @endsection
 

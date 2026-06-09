@@ -30,7 +30,7 @@
     </turbo-frame>
 
     {{-- Mensaje de alerta si existe --}}
-    <x-alerta />
+    <x-shared.alerta />
 
 </div>
 

@@ -22,16 +22,16 @@
     {{-- Calendario --}}
     <div class="col-lg-9">
 
-        <x-admin-actividades-calendario :locaciones="$locaciones" :tipos-actividad="$tiposActividad" />
+        <x-admin.actividades-calendario :locaciones="$locaciones" :tipos-actividad="$tiposActividad" />
 
     </div>
 
     {{-- Sidebar --}}
     <div class="col-lg-3">
 
-        <x-admin-actividades-resumen :stats="$stats" />
+        <x-admin.actividades-resumen :stats="$stats" />
 
-        <x-admin-actividades-leyenda />
+        <x-admin.actividades-leyenda />
 
     </div>
 
@@ -46,7 +46,6 @@
     window.routeActualizar = "{{ url('admin/actividades') }}/__ID__";
     window.routeEliminar   = "{{ url('admin/actividades') }}/__ID__";
 </script>
-@vite(['resources/js/calendario.js'])
 @endpush
 @push('styles')
 <style>

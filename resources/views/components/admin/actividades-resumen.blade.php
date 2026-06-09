@@ -15,29 +15,29 @@
 
     <div class="card-body p-2">
 
-        <x-info-box
+        <x-shared.info-box
             :color="$stats['en_curso']['color']"
             :icon="$stats['en_curso']['icono']"
             label="En curso"
-            :value="$stats['en_curso']['valor']"></x-info-box>
+            :value="$stats['en_curso']['valor']"></x-shared.info-box>
 
-        <x-info-box
+        <x-shared.info-box
             :color="$stats['pendientes']['color']"
             :icon="$stats['pendientes']['icono']"
             label="Pendientes"
-            :value="$stats['pendientes']['valor']"></x-info-box>
+            :value="$stats['pendientes']['valor']"></x-shared.info-box>
 
-        <x-info-box
+        <x-shared.info-box
             :color="$stats['finalizadas']['color']"
             :icon="$stats['finalizadas']['icono']"
             label="Finalizadas"
-            :value="$stats['finalizadas']['valor']"></x-info-box>
+            :value="$stats['finalizadas']['valor']"></x-shared.info-box>
 
-        <x-info-box
+        <x-shared.info-box
             :color="$stats['total']['color']"
             :icon="$stats['total']['icono']"
             label="Total"
-            :value="$stats['total']['valor']"></x-info-box>
+            :value="$stats['total']['valor']"></x-shared.info-box>
 
     </div>
 

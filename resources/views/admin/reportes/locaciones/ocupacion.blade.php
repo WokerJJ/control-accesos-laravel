@@ -122,11 +122,12 @@
 
         {{-- Ranking tabla --}}
         <div class="col-md-8">
-            <div class="card card-outline card-primary h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">
-                        <i class="fas fa-map-marker-alt mr-2"></i>Ranking de locaciones
-                    </h3>
+            <x-admin.data-table
+                icon="fas fa-map-marker-alt"
+                title="Ranking de locaciones"
+                full-height
+            >
+                <x-slot:tools>
                     <div class="d-flex gap-1">
                         <a href="{{ route('admin.reportes.export.locaciones.csv', request()->query()) }}"
                            class="btn btn-sm btn-success export-btn" data-turbo="false">
@@ -137,77 +138,74 @@
                             <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                         </a>
                     </div>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Locación</th>
-                            <th class="text-end">Accesos</th>
-                            <th class="text-end">En curso</th>
-                            <th>Participación</th>
-                            <th>Días activa</th>
-                            <th>Prom.</th>
-                            <th>Últ. acceso</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($ocupacion as $i => $loc)
-                        <tr>
-                            <td>
-                                @if($i === 0)
-                                <i class="fas fa-medal text-warning"></i>
-                                @elseif($i === 1)
-                                <i class="fas fa-medal text-secondary"></i>
-                                @elseif($i === 2)
-                                <i class="fas fa-medal" style="color:#cd7f32"></i>
-                                @else
-                                <span class="text-muted">{{ $i + 1 }}</span>
-                                @endif
-                            </td>
-                            <td class="fw-bold">{{ $loc->nombre }}</td>
-                            <td class="text-end">
-                                <span class="badge bg-primary">{{ $loc->total_accesos }}</span>
-                            </td>
-                            <td class="text-end">
-                                @if($loc->en_curso > 0)
-                                <span class="badge bg-success">{{ $loc->en_curso }}</span>
-                                @else
-                                <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td style="min-width:130px;">
-                                <div class="d-flex align-items-center gap-1">
-                                    <div class="progress flex-grow-1" style="height:6px;">
-                                        <div class="progress-bar bg-primary"
-                                             style="width:{{ $loc->porcentaje }}%"></div>
-                                    </div>
-                                    <small class="text-muted">{{ $loc->porcentaje }}%</small>
-                                </div>
-                            </td>
-                            <td>
-                                <small class="text-muted">{{ $loc->dias_activa }} días</small>
-                            </td>
-                            <td>
-                                <small class="text-muted">{{ $loc->duracion_promedio }}</small>
-                            </td>
-                            <td>
-                                <small class="text-muted">{{ $loc->ultimo_acceso }}</small>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
-                                <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                                Sin datos en el período
-                            </td>
-                        </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                </x-slot:tools>
+
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Locación</th>
+                    <th class="text-end">Accesos</th>
+                    <th class="text-end">En curso</th>
+                    <th>Participación</th>
+                    <th>Días activa</th>
+                    <th>Prom.</th>
+                    <th>Últ. acceso</th>
+                </tr>
+                </thead>
+                <tbody>
+                @forelse($ocupacion as $i => $loc)
+                <tr>
+                    <td>
+                        @if($i === 0)
+                        <i class="fas fa-medal text-warning"></i>
+                        @elseif($i === 1)
+                        <i class="fas fa-medal text-secondary"></i>
+                        @elseif($i === 2)
+                        <i class="fas fa-medal" style="color:#cd7f32"></i>
+                        @else
+                        <span class="text-muted">{{ $i + 1 }}</span>
+                        @endif
+                    </td>
+                    <td class="fw-bold">{{ $loc->nombre }}</td>
+                    <td class="text-end">
+                        <span class="badge bg-primary">{{ $loc->total_accesos }}</span>
+                    </td>
+                    <td class="text-end">
+                        @if($loc->en_curso > 0)
+                        <span class="badge bg-success">{{ $loc->en_curso }}</span>
+                        @else
+                        <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td style="min-width:130px;">
+                        <div class="d-flex align-items-center gap-1">
+                            <div class="progress flex-grow-1" style="height:6px;">
+                                <div class="progress-bar bg-primary"
+                                     style="width:{{ $loc->porcentaje }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ $loc->porcentaje }}%</small>
+                        </div>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ $loc->dias_activa }} días</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ $loc->duracion_promedio }}</small>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ $loc->ultimo_acceso }}</small>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+                        Sin datos en el período
+                    </td>
+                </tr>
+                @endforelse
+                </tbody>
+            </x-admin.data-table>
         </div>
 
     </div>

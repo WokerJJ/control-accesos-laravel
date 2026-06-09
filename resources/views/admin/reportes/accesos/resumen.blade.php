@@ -164,65 +164,57 @@
     </div>
 
     {{-- ── Tabla últimos accesos ────────────────────── --}}
-    <div class="card card-outline card-primary">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-list mr-2"></i>Últimos accesos del día
-            </h3>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Persona</th>
-                        <th>Documento</th>
-                        <th>Actividad</th>
-                        <th>Locación</th>
-                        <th>Ingreso</th>
-                        <th>Salida</th>
-                        <th>Duración</th>
-                        <th>Estado</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($ultimosAccesos as $acceso)
-                    <tr>
-                        <td>
-                            {{ $acceso->persona->primer_nombre }}
-                            {{ $acceso->persona->primer_apellido }}
-                        </td>
-                        <td>
-                            <small class="text-muted">
-                                {{ $acceso->persona->doc_identidad }}
-                            </small>
-                        </td>
-                        <td>{{ $acceso->actividad->nombre }}</td>
-                        <td>{{ $acceso->locacion->nombre }}</td>
-                        <td>{{ $acceso->hora_ingreso?->format('H:i') }}</td>
-                        <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
-                        <td>
-                            {{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}
-                        </td>
-                        <td>
-                                <span class="badge bg-{{ $acceso->estado === 'en_curso' ? 'success' : 'secondary' }}">
-                                    {{ $acceso->estado === 'en_curso' ? 'En curso' : 'Completado' }}
-                                </span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                            Sin accesos registrados hoy
-                        </td>
-                    </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <x-admin.data-table
+        icon="fas fa-list"
+        title="Últimos accesos del día"
+    >
+    <thead class="table-light">
+    <tr>
+        <th>Persona</th>
+        <th>Documento</th>
+        <th>Actividad</th>
+        <th>Locación</th>
+        <th>Ingreso</th>
+        <th>Salida</th>
+        <th>Duración</th>
+        <th>Estado</th>
+    </tr>
+    </thead>
+    <tbody>
+    @forelse($ultimosAccesos as $acceso)
+    <tr>
+        <td>
+            {{ $acceso->persona->primer_nombre }}
+            {{ $acceso->persona->primer_apellido }}
+        </td>
+        <td>
+            <small class="text-muted">
+                {{ $acceso->persona->doc_identidad }}
+            </small>
+        </td>
+        <td>{{ $acceso->actividad->nombre }}</td>
+        <td>{{ $acceso->locacion->nombre }}</td>
+        <td>{{ $acceso->hora_ingreso?->format('H:i') }}</td>
+        <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
+        <td>
+            {{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}
+        </td>
+        <td>
+            <span class="badge bg-{{ $acceso->estado === 'en_curso' ? 'success' : 'secondary' }}">
+                {{ $acceso->estado === 'en_curso' ? 'En curso' : 'Completado' }}
+            </span>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x d-block mb-2"></i>
+            Sin accesos registrados hoy
+        </td>
+    </tr>
+    @endforelse
+    </tbody>
+</x-admin.data-table>
 
 </div>
 @endsection

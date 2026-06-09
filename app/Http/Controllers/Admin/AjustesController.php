@@ -20,12 +20,14 @@ class AjustesController extends Controller
             'rol:id,nombre_rol',
         ]);
 
+        $departamentos = \App\Models\Departamento::with('municipios:id,nombre,departamento_id')
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
+
         return view('admin.ajustes.index', [
-            'usuario'    => $usuario,
-            'persona'    => $usuario->persona,
-            'municipios' => \App\Models\Municipio::with('departamento:id,nombre')
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'departamento_id']),
+            'usuario'      => $usuario,
+            'persona'      => $usuario->persona,
+            'departamentos' => $departamentos,
         ]);
     }
 
@@ -35,7 +37,7 @@ class AjustesController extends Controller
             'email'        => 'nullable|email|max:150',
             'celular'      => 'nullable|string|max:20',
             'direccion'    => 'nullable|string|max:200',
-            'municipio_id' => 'nullable|exists:municipios,id',
+            'municipio_id' => 'nullable|exists:municipio,id',
         ]);
 
         Auth::user()->persona->update([
