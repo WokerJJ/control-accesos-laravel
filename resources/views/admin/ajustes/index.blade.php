@@ -80,9 +80,7 @@
 
                             {{-- Editables --}}
                             <div class="col-md-6">
-                                <label class="form-label">
-                                    Email
-                                </label>
+                                <label class="form-label">Email</label>
                                 <input type="email"
                                        name="email"
                                        class="form-control @error('email') is-invalid @enderror"
@@ -107,7 +105,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label">Departamento</label>
                                 <select id="selectDepartamento" class="form-control">
                                     <option value="">— Selecciona —</option>
@@ -120,7 +118,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label">Municipio</label>
                                 <select name="municipio_id"
                                         id="selectMunicipio"

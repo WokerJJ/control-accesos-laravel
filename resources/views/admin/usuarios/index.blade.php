@@ -348,16 +348,35 @@
                     rol_id:       document.getElementById('edit_rol_id').value,
                     estado:       document.getElementById('edit_estado').value,
                 }),
-                signal: _guardarAbortCtrl.signal
+                signal: _guardarAbortCtrl.signal,
+                redirect: 'manual'
             })
                 .then(r => {
-                    if (!r.ok) throw new Error('Error del servidor')
+                    // Si el servidor redirige (sesión expirada, CSRF), recargar
+                    if (r.type === 'opaqueredirect' || r.status === 0) {
+                        window.location.reload()
+                        throw new Error('__skip')
+                    }
+                    // Si el status es 419 (CSRF expired) o 401, recargar
+                    if (r.status === 419 || r.status === 401) {
+                        window.location.reload()
+                        throw new Error('__skip')
+                    }
+                    if (!r.ok) {
+                        // Intentar leer el JSON de error del servidor
+                        return r.json().then(
+                            err => {
+                                const msg = err.message || Object.values(err.errors || {}).flat().join('\n') || 'Error del servidor'
+                                throw new Error(msg)
+                            },
+                            () => { throw new Error('Error del servidor (' + r.status + ')') }
+                        )
+                    }
                     return r.json()
                 })
                 .then(data => {
                     if (data.ok || data.success) {
                         bootstrap.Modal.getInstance(editarModalEl)?.hide()
-                        // Toast de éxito opcional
                         mostrarToast('Cambios guardados correctamente', 'success')
                         setTimeout(() => window.location.reload(), 800)
                     } else {
@@ -365,6 +384,7 @@
                     }
                 })
                 .catch(err => {
+                    if (err.message === '__skip') return
                     alert(err.message || 'Error al guardar. Intenta de nuevo.')
                 })
                 .finally(() => {
