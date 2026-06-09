@@ -55,13 +55,28 @@ document.addEventListener('turbo:frame-load', loadCalendar);
 
 // ═══════════════════════════════════════════════
 // Bootstrap Modal accessibility fix (aria-hidden)
-// Blur focused element BEFORE Bootstrap sets aria-hidden
+// Blur ALL focused elements INSIDE the modal BEFORE Bootstrap sets aria-hidden
 // ═══════════════════════════════════════════════
 document.addEventListener('hide.bs.modal', (e) => {
   const modal = e.target;
-  if (modal && document.activeElement && modal.contains(document.activeElement)) {
+  if (!modal) return;
+  // Blur the active element if it's inside this modal
+  if (document.activeElement && modal.contains(document.activeElement)) {
     document.activeElement.blur();
   }
+  // Also blur any focused element inside the modal (handles edge cases)
+  const focused = modal.querySelector(':focus');
+  if (focused) focused.blur();
+});
+
+// ═══════════════════════════════════════════════
+// Re-initialize page-specific functionality after Turbo navigation
+// Scripts in @push('scripts') may not re-execute reliably
+// ═══════════════════════════════════════════════
+document.addEventListener('turbo:load', () => {
+  if (typeof initUsuariosModals === 'function') initUsuariosModals();
+  if (typeof initAccesosModal === 'function') initAccesosModal();
+  if (typeof initCasillerosModal === 'function') initCasillerosModal();
 });
 
 // ═══════════════════════════════════════════════
