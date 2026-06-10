@@ -39,14 +39,7 @@
 
 @endsection
 
-@push('scripts')
-<script>
-    window.calendarEvents  = @json($eventos);
-    window.routeCrear      = "{{ route('admin.actividades.programar') }}";
-    window.routeActualizar = "{{ url('admin/actividades') }}/__ID__";
-    window.routeEliminar   = "{{ url('admin/actividades') }}/__ID__";
-</script>
-@endpush
+
 @push('styles')
 <style>
     .fc-event { cursor: pointer !important; }

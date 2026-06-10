@@ -25,9 +25,7 @@
     </div>
 
     {{-- Contenido de la vista --}}
-    <turbo-frame id="main" style="display: contents;">
-        @yield('content')
-    </turbo-frame>
+    @yield('content')
 
     {{-- Mensaje de alerta si existe --}}
     <x-shared.alerta />

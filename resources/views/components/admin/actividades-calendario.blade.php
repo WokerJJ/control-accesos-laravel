@@ -29,7 +29,11 @@
             <p class="text-muted mb-0">Cargando calendario...</p>
         </div>
 
-        <div id="calendar" style="visibility:hidden;"></div>
+        <div id="calendar" style="visibility:hidden;"
+             data-events='@json($eventos)'
+             data-route-crear="{{ route('admin.actividades.programar') }}"
+             data-route-actualizar="{{ url('admin/actividades') }}/__ID__"
+             data-route-eliminar="{{ url('admin/actividades') }}/__ID__"></div>
 
     </div>
 

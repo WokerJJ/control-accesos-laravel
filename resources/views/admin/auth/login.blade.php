@@ -79,33 +79,4 @@
 
 @endsection
 
-@push('scripts')
-<script>
-    $(function () {
-        const $input  = $('#input-password');
-        const $icono  = $('#icono-password');
-        const $toggle = $('#toggle-password');
 
-        $toggle.on('click', function () {
-            const visible = $input.attr('type') === 'text';
-
-            // Cambiar tipo
-            $input.attr('type', visible ? 'password' : 'text');
-
-            // Cambiar icono
-            $icono
-                .toggleClass('fa-eye',        visible)
-                .toggleClass('fa-eye-slash', !visible);
-
-            // Mantener foco en el input
-            $input.focus();
-        });
-
-        // Ocultar password al salir del campo por seguridad
-        $input.on('blur', function () {
-            $input.attr('type', 'password');
-            $icono.removeClass('fa-eye-slash').addClass('fa-eye');
-        });
-    });
-</script>
-@endpush

@@ -54,34 +54,3 @@
 </div>
 @endif
 
-{{-- Script solo si hay algo que mostrar --}}
-@if($errors->any() || session('mensaje'))
-@php
-$hayErrores = $errors->any();
-$hayMensaje = session('mensaje') ? true : false;
-@endphp
-
-@push('scripts')
-<script>
-    $(function () {
-        if ({{ $hayErrores ? 'true' : 'false' }}) {
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    $('#barra-progreso').css('width', '0%');
-                });
-            });
-            setTimeout(function () { $('#alerta-global').alert('close'); }, 4200);
-        }
-
-        if ({{ $hayMensaje ? 'true' : 'false' }}) {
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    $('#barra-session').css('width', '0%');
-                });
-            });
-            setTimeout(function () { $('#alerta-session').alert('close'); }, 4200);
-        }
-    });
-</script>
-@endpush
-@endif

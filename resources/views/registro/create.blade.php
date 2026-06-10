@@ -128,7 +128,14 @@
                         <label class="text-muted">
                             Departamento
                         </label>
-                        <select id="selectDepartamento" class="form-control">
+                        <select id="selectDepartamento" class="form-control"
+                                data-departamentos="{!! urlencode(json_encode(
+                                    $departamentos->mapWithKeys(fn($d) => [
+                                        $d->id => $d->municipios->map(fn($m) => ['id' => $m->id, 'nombre' => $m->nombre])
+                                    ]),
+                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+                                )) !!}"
+                                data-municipio-actual="">
                             <option value="">— Selecciona —</option>
                             @foreach($departamentos as $depto)
                             <option value="{{ $depto->id }}"
@@ -179,38 +186,4 @@
 </div>
 
 @endsection
-@push('scripts')
-<script>
-    // Municipios anidados en el objeto de departamentos
-    var departamentos = {!! json_encode(
-        $departamentos->mapWithKeys(fn($d) => [
-        $d->id => $d->municipios->map(fn($m) => ['id' => $m->id, 'nombre' => $m->nombre])
-    ]),
-    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
-    ) !!};
 
-    document.getElementById('selectDepartamento')
-        .addEventListener('change', function () {
-            var deptoId   = this.value
-            var select    = document.getElementById('selectMunicipio')
-            var municipios = departamentos[deptoId] ?? []
-
-            // Limpiar y resetear
-            select.innerHTML = '<option value="">— Selecciona un municipio —</option>'
-
-            if (!municipios.length) {
-                select.disabled = true
-                return
-            }
-
-            municipios.forEach(function (m) {
-                var opt = document.createElement('option')
-                opt.value       = m.id
-                opt.textContent = m.nombre
-                select.appendChild(opt)
-            })
-
-            select.disabled = false
-        })
-</script>
-@endpush

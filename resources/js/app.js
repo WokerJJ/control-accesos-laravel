@@ -386,12 +386,157 @@ function initCasillerosModal() {
 }
 
 // ═══════════════════════════════════════════════
+// Ajustes: Departamentos → Municipios cascade
+// ═══════════════════════════════════════════════
+function initAjustesCascade() {
+  const selectDepto = document.getElementById('selectDepartamento');
+  const selectMuni = document.getElementById('selectMunicipio');
+  if (!selectDepto || !selectMuni) return;
+
+  if (selectDepto._cascadeInit) return;
+  selectDepto._cascadeInit = true;
+
+  const departamentos = JSON.parse(decodeURIComponent(selectDepto.dataset.departamentos || '{}'));
+  const municipioActual = selectDepto.dataset.municipioActual || '';
+
+  function cargarMunicipios(deptoId, seleccionarId) {
+    const municipios = departamentos[deptoId] ?? [];
+    selectMuni.innerHTML = '<option value="">— Selecciona un municipio —</option>';
+    if (!municipios.length) { selectMuni.disabled = true; return; }
+    municipios.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nombre;
+      if (m.id == seleccionarId) opt.selected = true;
+      selectMuni.appendChild(opt);
+    });
+    selectMuni.disabled = false;
+  }
+
+  selectDepto.addEventListener('change', function () {
+    cargarMunicipios(this.value, null);
+  });
+
+  if (selectDepto.value) {
+    cargarMunicipios(selectDepto.value, municipioActual);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// Actividades: Pass calendar events via data attributes
+// ═══════════════════════════════════════════════
+function initActividadesData() {
+  const calendarEl = document.getElementById('calendar');
+  if (!calendarEl) return;
+  if (calendarEl._dataInit) return;
+  calendarEl._dataInit = true;
+
+  if (calendarEl.dataset.events) {
+    window.calendarEvents = JSON.parse(calendarEl.dataset.events);
+  }
+  if (calendarEl.dataset.routeCrear) {
+    window.routeCrear = calendarEl.dataset.routeCrear;
+  }
+  if (calendarEl.dataset.routeActualizar) {
+    window.routeActualizar = calendarEl.dataset.routeActualizar;
+  }
+  if (calendarEl.dataset.routeEliminar) {
+    window.routeEliminar = calendarEl.dataset.routeEliminar;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// Login: password toggle
+// ═══════════════════════════════════════════════
+function initLoginPasswordToggle() {
+  const toggle = document.getElementById('toggle-password');
+  if (!toggle) return;
+  if (toggle._toggleInit) return;
+  toggle._toggleInit = true;
+
+  const input = document.getElementById('input-password');
+  const icono = document.getElementById('icono-password');
+  if (!input || !icono) return;
+
+  toggle.addEventListener('click', () => {
+    const visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    icono.classList.toggle('fa-eye', visible);
+    icono.classList.toggle('fa-eye-slash', !visible);
+    input.focus();
+  });
+
+  input.addEventListener('blur', () => {
+    input.type = 'password';
+    icono.classList.remove('fa-eye-slash');
+    icono.classList.add('fa-eye');
+  });
+}
+
+// ═══════════════════════════════════════════════
+// Alerta auto-close (progress bar animation)
+// ═══════════════════════════════════════════════
+function initAlertas() {
+  const alertaGlobal = document.getElementById('alerta-global');
+  const barraProgreso = document.getElementById('barra-progreso');
+  if (alertaGlobal && barraProgreso) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      barraProgreso.style.width = '0%';
+    }));
+    setTimeout(() => {
+      const instance = bootstrap.Alert.getOrCreateInstance(alertaGlobal);
+      instance.close();
+    }, 4200);
+  }
+
+  const alertaSession = document.getElementById('alerta-session');
+  const barraSession = document.getElementById('barra-session');
+  if (alertaSession && barraSession) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      barraSession.style.width = '0%';
+    }));
+    setTimeout(() => {
+      const instance = bootstrap.Alert.getOrCreateInstance(alertaSession);
+      instance.close();
+    }, 4200);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// Ingreso: real-time clock
+// ═══════════════════════════════════════════════
+let _clockInterval = null;
+
+function initReloj() {
+  const reloj = document.getElementById('reloj');
+  if (!reloj) {
+    if (_clockInterval) { clearInterval(_clockInterval); _clockInterval = null; }
+    return;
+  }
+  if (_clockInterval) return;
+
+  function actualizarReloj() {
+    const ahora = new Date();
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    reloj.textContent = `${horas}:${minutos}`;
+  }
+  actualizarReloj();
+  _clockInterval = setInterval(actualizarReloj, 1000);
+}
+
+// ═══════════════════════════════════════════════
 // Re-initialize page-specific functionality after Turbo navigation
 // ═══════════════════════════════════════════════
 document.addEventListener('turbo:load', () => {
   initAccesosModal();
   initUsuariosModals();
   initCasillerosModal();
+  initAjustesCascade();
+  initActividadesData();
+  initLoginPasswordToggle();
+  initAlertas();
+  initReloj();
 });
 
 // ═══════════════════════════════════════════════

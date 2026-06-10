@@ -41,9 +41,7 @@
         <div class="app-content">
             <div class="container-fluid">
                 <x-shared.alerta />
-                <turbo-frame id="main" style="display: contents;">
                 @yield('content')
-            </turbo-frame>
             </div>
         </div>
 
