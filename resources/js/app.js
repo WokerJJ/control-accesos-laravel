@@ -448,7 +448,6 @@ document.addEventListener('turbo:load', () => {
   initLoginPasswordToggle();
   initAlertas();
   initReloj();
-  reinitCardCollapse();
 });
 
 // ═══════════════════════════════════════════════
@@ -515,76 +514,61 @@ document.addEventListener('turbo:load', initCharCounters);
 document.addEventListener('turbo:frame-load', initCharCounters);
 
 // ═══════════════════════════════════════════════
-// Card collapse (AdminLTE) — re-bind on Turbo navigation
-// AdminLTE binds handlers at DOMContentLoaded. When Turbo replaces the body,
-// new [data-lte-toggle="card-collapse"] buttons lose their handlers.
-// Re-bind by cloning+replacing (removes old listeners) then attaching fresh ones.
+// Card collapse — capture-phase delegation (attaches once, never duplicated)
+// Intercepts BEFORE AdminLTE's per-element handler to prevent # in URL.
 // ═══════════════════════════════════════════════
-reinitCardCollapse._skipFirst = true; // AdminLTE handles initial load
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lte-toggle="card-collapse"]');
+  if (!btn) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  const card = btn.closest('.card');
+  if (!card) return;
+  if (btn._animating) return;
+  btn._animating = true;
+  const L = 'collapsed-card';
+  const body = card.querySelector(':scope > .card-body, :scope > .card-footer');
+  const icon = btn.querySelector('i');
+  const cleanup = () => {
+    btn._animating = false;
+    body.style.removeProperty('height');
+    body.style.removeProperty('overflow');
+    body.style.removeProperty('transition');
+  };
 
-function reinitCardCollapse() {
-  // Skip initial page load — AdminLTE already binds its own handlers on DOMContentLoaded
-  if (reinitCardCollapse._skipFirst) { reinitCardCollapse._skipFirst = false; return; }
-  document.querySelectorAll('[data-lte-toggle="card-collapse"]').forEach(btn => {
-    // Skip if already bound (AdminLTE adds its own handler)
-    if (btn._cardCollapseBound) return;
-    btn._cardCollapseBound = true;
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const card = btn.closest('.card');
-      if (!card) return;
-      const L = 'collapsed-card';
-      const body = card.querySelector(':scope > .card-body, :scope > .card-footer');
-      const icon = btn.querySelector('i');
-
-      if (card.classList.contains(L)) {
-        // Expand
-        card.classList.remove(L);
-        card.classList.remove('was-collapsed');
-        if (body) {
-          body.style.removeProperty('display');
-          let display = getComputedStyle(body).display;
-          if (display === 'none') display = 'block';
-          body.style.display = display;
-          body.offsetHeight; // force reflow
-          body.style.overflow = 'hidden';
-          const targetH = body.scrollHeight;
-          body.style.height = '0';
-          body.offsetHeight;
-          body.style.transition = 'height 0.3s ease';
-          body.style.height = targetH + 'px';
-          const done = () => {
-            body.style.removeProperty('height');
-            body.style.removeProperty('overflow');
-            body.style.removeProperty('transition');
-            body.removeEventListener('transitionend', done);
-          };
-          body.addEventListener('transitionend', done);
-        }
-        if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
-      } else {
-        // Collapse
-        card.classList.add(L);
-        if (body) {
-          body.style.overflow = 'hidden';
-          body.style.height = body.scrollHeight + 'px';
-          body.offsetHeight;
-          body.style.transition = 'height 0.3s ease';
-          body.style.height = '0';
-          const done = () => {
-            body.style.display = 'none';
-            body.style.removeProperty('height');
-            body.style.removeProperty('overflow');
-            body.style.removeProperty('transition');
-            body.removeEventListener('transitionend', done);
-          };
-          body.addEventListener('transitionend', done);
-        }
-        if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus'); }
-      }
-    });
-  });
-}
+  if (card.classList.contains(L)) {
+    // Expand
+    card.classList.remove(L);
+    card.classList.remove('was-collapsed');
+    if (body) {
+      body.style.removeProperty('display');
+      body.offsetHeight;
+      body.style.overflow = 'hidden';
+      const targetH = body.scrollHeight;
+      body.style.height = '0';
+      body.offsetHeight;
+      body.style.transition = 'height 0.3s ease';
+      body.style.height = targetH + 'px';
+      body.addEventListener('transitionend', cleanup, { once: true });
+    }
+    if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
+  } else {
+    // Collapse
+    card.classList.add(L);
+    if (body) {
+      body.style.overflow = 'hidden';
+      body.style.height = body.scrollHeight + 'px';
+      body.offsetHeight;
+      body.style.transition = 'height 0.3s ease';
+      body.style.height = '0';
+      body.addEventListener('transitionend', () => {
+        body.style.display = 'none';
+        cleanup();
+      }, { once: true });
+    }
+    if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus'); }
+  }
+}, { capture: true });
 
 // Treeview accordion — only toggle on parent items (href="#")
 document.addEventListener('click', (e) => {
