@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="/adminlte/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="/adminlte/dist/css/adminlte.min.css">
         @stack('styles')
+    <script src="/adminlte/plugins/jquery/jquery.min.js"></script>
+    <script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/adminlte/dist/js/adminlte.min.js"></script>
 </head>
 
 <body class="layout-fixed sidebar-expand-lg sidebar-mini">
@@ -54,9 +57,5 @@
 
 </div>
 
-<script src="/adminlte/plugins/jquery/jquery.min.js"></script>
-<script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/adminlte/dist/js/adminlte.min.js"></script>
-@stack('scripts')
 </body>
 </html>

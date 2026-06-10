@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="/adminlte/dist/css/adminlte.min.css">
     
     @stack('styles')
+    @vite(['resources/js/app.js'])
+    <script src="/adminlte/plugins/jquery/jquery.min.js"></script>
+    <script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/adminlte/dist/js/adminlte.min.js"></script>
 </head>
 <body class="hold-transition" style="background: #1a1a2e;">
 
@@ -32,10 +36,6 @@
 
 </div>
 
-<script src="/adminlte/plugins/jquery/jquery.min.js"></script>
-<script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/adminlte/dist/js/adminlte.min.js"></script>
 
-@stack('scripts')
 </body>
 </html>

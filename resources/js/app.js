@@ -84,14 +84,17 @@ function _ensureFetchCtrl() {
 }
 
 // --- SHOW: Load data when any modal opens ---
+// Guard against duplicate show events (Bootstrap re-execution safety)
 document.addEventListener('show.bs.modal', (e) => {
   const modalEl = e.target;
   const related = e.relatedTarget;
 
   // ── Acceso detail ──
   if (modalEl.id === 'accesoDetalleModal') {
+    if (modalEl._isShowing) return;
     const id = related?.dataset?.id;
     if (!id) return;
+    modalEl._isShowing = true;
     const body = document.getElementById('accesoDetalleModalBody');
     const signal = _ensureFetchCtrl();
     body.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando...</div>';
@@ -110,8 +113,10 @@ document.addEventListener('show.bs.modal', (e) => {
 
   // ── Usuario detail ──
   if (modalEl.id === 'usuarioDetalleModal') {
+    if (modalEl._isShowing) return;
     const id = related?.dataset?.id;
     if (!id) return;
+    modalEl._isShowing = true;
     const body = document.getElementById('usuarioDetalleModalBody');
     const signal = _ensureFetchCtrl();
     body.innerHTML = '<div class="text-center text-muted py-5"><div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mb-0">Cargando información...</p></div>';
@@ -151,6 +156,7 @@ document.addEventListener('show.bs.modal', (e) => {
 
 // --- HIDDEN: Cleanup when any modal closes ---
 document.addEventListener('hidden.bs.modal', (e) => {
+  e.target._isShowing = false;
   if (_modalFetchCtrl) { _modalFetchCtrl.abort(); _modalFetchCtrl = null; }
   if (e.target.id === 'usuarioDetalleModal') {
     const body = document.getElementById('usuarioDetalleModalBody');
