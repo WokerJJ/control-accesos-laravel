@@ -70,13 +70,328 @@ document.addEventListener('hide.bs.modal', (e) => {
 });
 
 // ═══════════════════════════════════════════════
+// Accesos modal (AJAX detail)
+// ═══════════════════════════════════════════════
+let _accesosAbortCtrl = null;
+
+function initAccesosModal() {
+  const modalEl = document.getElementById('accesoDetalleModal');
+  if (!modalEl) return;
+
+  const modalBody = document.getElementById('accesoDetalleModalBody');
+  const spinner = `
+    <div class="text-center text-muted py-4">
+      <i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>
+      Cargando...
+    </div>`;
+
+  if (modalEl._accesosInit) return;
+  modalEl._accesosInit = true;
+
+  modalEl.addEventListener('show.bs.modal', function (e) {
+    const id = e.relatedTarget?.dataset?.id;
+    if (!id) return;
+
+    if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
+    _accesosAbortCtrl = new AbortController();
+
+    modalBody.innerHTML = spinner;
+
+    fetch(`/admin/accesos/${id}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      signal: _accesosAbortCtrl.signal
+    })
+      .then(r => r.text())
+      .then(html => { modalBody.innerHTML = html; })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        modalBody.innerHTML = `
+          <div class="text-center text-danger py-4">
+            <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
+            Error al cargar el detalle
+          </div>`;
+      });
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
+    modalBody.innerHTML = spinner;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// Usuarios modals (AJAX detail + edit + save)
+// ═══════════════════════════════════════════════
+let _usuariosAbortCtrl = null;
+let _editarAbortCtrl = null;
+let _guardarAbortCtrl = null;
+
+function initUsuariosModals() {
+  const detalleModalEl = document.getElementById('usuarioDetalleModal');
+  if (!detalleModalEl) return;
+
+  if (detalleModalEl._usuariosInit) return;
+  detalleModalEl._usuariosInit = true;
+
+  const editarModalEl = document.getElementById('editarModal');
+  const detalleBody = document.getElementById('usuarioDetalleModalBody');
+  const spinner = `
+    <div class="text-center text-muted py-5">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mb-0">Cargando información...</p>
+    </div>`;
+
+  let editarId = null;
+
+  // ═══════════════════════════════════════════
+  // MODAL DETALLE (carga vía AJAX)
+  // ═══════════════════════════════════════════
+  detalleModalEl.addEventListener('show.bs.modal', function (e) {
+    const id = e.relatedTarget?.dataset?.id;
+    if (!id) return;
+
+    if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
+    _usuariosAbortCtrl = new AbortController();
+
+    detalleBody.innerHTML = spinner;
+
+    fetch(`/admin/usuarios/${id}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      signal: _usuariosAbortCtrl.signal
+    })
+      .then(r => {
+        if (!r.ok) throw new Error('Error ' + r.status);
+        return r.text();
+      })
+      .then(html => {
+        detalleBody.innerHTML = html;
+        const tooltips = detalleBody.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        detalleBody.innerHTML = `
+          <div class="text-center text-danger py-5">
+            <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+            <p class="mb-0">Error al cargar el detalle</p>
+            <button class="btn btn-sm btn-outline-danger mt-2" onclick="location.reload()">
+              <i class="fas fa-redo me-1"></i>Reintentar
+            </button>
+          </div>`;
+      });
+  });
+
+  detalleModalEl.addEventListener('hidden.bs.modal', function () {
+    if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
+    detalleBody.innerHTML = spinner;
+  });
+
+  // ═══════════════════════════════════════════
+  // DELEGACIÓN: botón editar dentro del detalle
+  // ═══════════════════════════════════════════
+  detalleBody.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-editar');
+    if (!btn) return;
+
+    const datos = {
+      id:           btn.dataset.id,
+      email:        btn.dataset.email        ?? '',
+      celular:      btn.dataset.celular      ?? '',
+      direccion:    btn.dataset.direccion    ?? '',
+      municipio_id: btn.dataset.municipioId  ?? '',
+      rol_id:       btn.dataset.rolId        ?? '',
+      estado:       btn.dataset.estado       ?? 'activo',
+    };
+
+    abrirEditar(datos);
+  });
+
+  // ═══════════════════════════════════════════
+  // MODAL EDITAR (desde tabla o desde detalle)
+  // ═══════════════════════════════════════════
+  editarModalEl?.addEventListener('show.bs.modal', function (e) {
+    const btn = e.relatedTarget;
+    if (!btn?.dataset?.id) return;
+
+    if (!btn.classList.contains('btn-editar')) {
+      const id = btn.dataset.id;
+
+      if (_editarAbortCtrl) _editarAbortCtrl.abort();
+      _editarAbortCtrl = new AbortController();
+
+      fetch(`/admin/usuarios/${id}`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        },
+        signal: _editarAbortCtrl.signal
+      })
+        .then(r => {
+          if (!r.ok) throw new Error('Error ' + r.status);
+          return r.json();
+        })
+        .then(data => abrirEditar({
+          id:           data.usuario_id,
+          email:        data.email,
+          celular:      data.celular,
+          direccion:    data.direccion,
+          municipio_id: data.municipio_id,
+          rol_id:       data.rol_id,
+          estado:       data.estado,
+        }))
+        .catch(err => {
+          if (err.name === 'AbortError') return;
+          alert('Error al cargar datos para editar');
+        });
+    }
+  });
+
+  window.abrirEditar = function (datos) {
+    editarId = datos.id;
+
+    document.getElementById('edit_email').value        = datos.email;
+    document.getElementById('edit_celular').value      = datos.celular;
+    document.getElementById('edit_direccion').value    = datos.direccion;
+    document.getElementById('edit_municipio_id').value = datos.municipio_id;
+    document.getElementById('edit_rol_id').value       = datos.rol_id;
+    document.getElementById('edit_estado').value       = datos.estado;
+
+    const detalleModal = bootstrap.Modal.getInstance(detalleModalEl);
+    if (detalleModal) {
+      const onHidden = function () {
+        detalleModalEl.removeEventListener('hidden.bs.modal', onHidden);
+        bootstrap.Modal.getOrCreateInstance(editarModalEl).show();
+      };
+      detalleModalEl.addEventListener('hidden.bs.modal', onHidden);
+      detalleModal.hide();
+    } else {
+      bootstrap.Modal.getOrCreateInstance(editarModalEl).show();
+    }
+  };
+
+  // ═══════════════════════════════════════════
+  // GUARDAR CAMBIOS
+  // ═══════════════════════════════════════════
+  document.getElementById('btnGuardarUsuario')?.addEventListener('click', function () {
+    if (!editarId) return;
+
+    const btn = this;
+    const textoOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+    if (_guardarAbortCtrl) _guardarAbortCtrl.abort();
+    _guardarAbortCtrl = new AbortController();
+
+    fetch(`/admin/usuarios/${editarId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type':     'application/json',
+        'X-CSRF-TOKEN':     document.querySelector('meta[name=csrf-token]')?.content,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept':           'application/json',
+      },
+      body: JSON.stringify({
+        email:        document.getElementById('edit_email').value,
+        celular:      document.getElementById('edit_celular').value,
+        direccion:    document.getElementById('edit_direccion').value,
+        municipio_id: document.getElementById('edit_municipio_id').value || null,
+        rol_id:       document.getElementById('edit_rol_id').value,
+        estado:       document.getElementById('edit_estado').value,
+      }),
+      signal: _guardarAbortCtrl.signal,
+      redirect: 'manual'
+    })
+      .then(r => {
+        if (r.type === 'opaqueredirect' || r.status === 0) {
+          window.location.reload();
+          throw new Error('__skip');
+        }
+        if (r.status === 419 || r.status === 401) {
+          window.location.reload();
+          throw new Error('__skip');
+        }
+        if (!r.ok) {
+          return r.json().then(
+            err => {
+              const msg = err.message || Object.values(err.errors || {}).flat().join('\n') || 'Error del servidor';
+              throw new Error(msg);
+            },
+            () => { throw new Error('Error del servidor (' + r.status + ')'); }
+          );
+        }
+        return r.json();
+      })
+      .then(data => {
+        if (data.ok || data.success) {
+          bootstrap.Modal.getInstance(editarModalEl)?.hide();
+          mostrarToast('Cambios guardados correctamente', 'success');
+          setTimeout(() => window.location.reload(), 800);
+        } else {
+          throw new Error(data.message || 'Error al guardar');
+        }
+      })
+      .catch(err => {
+        if (err.message === '__skip') return;
+        alert(err.message || 'Error al guardar. Intenta de nuevo.');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+      });
+  });
+
+  function mostrarToast(mensaje, tipo = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top:20px;right:20px;z-index:9999;min-width:300px;';
+    toast.innerHTML = `
+      <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// Casilleros modal (data attributes)
+// ═══════════════════════════════════════════════
+function initCasillerosModal() {
+  const modal = document.getElementById('modalDetalle');
+  if (!modal) return;
+
+  if (modal.parentElement !== document.body) {
+    const previo = document.body.querySelector(':scope > #modalDetalle');
+    if (previo && previo !== modal) previo.remove();
+    document.body.appendChild(modal);
+  }
+
+  if (modal._casillerosInit) return;
+  modal._casillerosInit = true;
+
+  modal.addEventListener('show.bs.modal', event => {
+    const box = event.relatedTarget;
+    if (!box) return;
+
+    document.getElementById('detalleCodigo').textContent = box.dataset.codigo;
+    document.getElementById('detalleEstado').textContent = box.dataset.estado;
+    document.getElementById('detallePersona').textContent = box.dataset.persona || 'Libre';
+    document.getElementById('detalleActividad').textContent = box.dataset.actividad || '—';
+    document.getElementById('detalleHora').textContent = box.dataset.hora || '—';
+  });
+}
+
+// ═══════════════════════════════════════════════
 // Re-initialize page-specific functionality after Turbo navigation
-// Scripts in @push('scripts') may not re-execute reliably
 // ═══════════════════════════════════════════════
 document.addEventListener('turbo:load', () => {
-  if (typeof initUsuariosModals === 'function') initUsuariosModals();
-  if (typeof initAccesosModal === 'function') initAccesosModal();
-  if (typeof initCasillerosModal === 'function') initCasillerosModal();
+  initAccesosModal();
+  initUsuariosModals();
+  initCasillerosModal();
 });
 
 // ═══════════════════════════════════════════════

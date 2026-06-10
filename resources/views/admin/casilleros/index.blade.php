@@ -26,6 +26,4 @@
 
 <x-admin.casilleros-modal-detalle />
 
-@include('admin.casilleros.js.realtime')
-
 @endsection

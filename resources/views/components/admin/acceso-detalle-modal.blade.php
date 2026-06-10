@@ -1,4 +1,4 @@
-<div class="modal fade" id="detalleModal" tabindex="-1">
+<div class="modal fade" id="accesoDetalleModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
@@ -10,7 +10,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body" id="detalleModalBody">
+            <div class="modal-body" id="accesoDetalleModalBody">
                 <div class="text-center text-muted py-4">
                     <i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>
                     Cargando...

@@ -14,7 +14,7 @@ services:
     container_name: control-accesos-db
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: control_accesos

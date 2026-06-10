@@ -126,7 +126,7 @@
         <td>
             <button class="btn btn-sm btn-outline-primary"
                     data-bs-toggle="modal"
-                    data-bs-target="#detalleModal"
+                    data-bs-target="#accesoDetalleModal"
                     data-id="{{ $acceso->id }}"
                     title="Ver detalle">
                 <i class="fas fa-eye"></i>
@@ -150,60 +150,3 @@
 <x-admin.acceso-detalle-modal />
 
 @endsection
-
-@push('scripts')
-<script>
-    let _accesosAbortCtrl = null;
-
-    function initAccesosModal() {
-        const modalEl   = document.getElementById('detalleModal')
-        if (!modalEl) return
-
-        const modalBody = document.getElementById('detalleModalBody')
-        const spinner   = `
-        <div class="text-center text-muted py-4">
-            <i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>
-            Cargando...
-        </div>`
-
-        // Evitar duplicar listeners en re-inicializaciones Turbo
-        if (modalEl._accesosInit) return
-        modalEl._accesosInit = true
-
-        modalEl.addEventListener('show.bs.modal', function (e) {
-            const id  = e.relatedTarget?.dataset?.id
-            if (!id) return
-
-            // Cancelar petición anterior si existe
-            if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
-            _accesosAbortCtrl = new AbortController();
-
-            modalBody.innerHTML = spinner
-
-            fetch(`/admin/accesos/${id}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                signal: _accesosAbortCtrl.signal
-            })
-                .then(r => r.text())
-                .then(html => { modalBody.innerHTML = html })
-                .catch(err => {
-                    if (err.name === 'AbortError') return;
-                    modalBody.innerHTML = `
-                    <div class="text-center text-danger py-4">
-                        <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
-                        Error al cargar el detalle
-                    </div>`
-                })
-        })
-
-        modalEl.addEventListener('hidden.bs.modal', function () {
-            if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
-            modalBody.innerHTML = spinner
-        })
-    }
-
-    document.addEventListener('DOMContentLoaded', initAccesosModal)
-    document.addEventListener('turbo:load', initAccesosModal)
-    document.addEventListener('turbo:frame-load', initAccesosModal)
-</script>
-@endpush
