@@ -127,8 +127,6 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-outline-warning"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarModal"
                                         data-id="{{ $usuario->usuario_id }}"
                                         title="Editar">
                                     <i class="fas fa-edit"></i>
