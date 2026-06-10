@@ -22,7 +22,7 @@
     {{-- Calendario --}}
     <div class="col-lg-9">
 
-        <x-admin.actividades-calendario :locaciones="$locaciones" :tipos-actividad="$tiposActividad" />
+        <x-admin.actividades-calendario :locaciones="$locaciones" :tipos-actividad="$tiposActividad" :eventos="$eventos" />
 
     </div>
 

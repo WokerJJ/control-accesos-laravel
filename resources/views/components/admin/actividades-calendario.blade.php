@@ -1,3 +1,5 @@
+@props(['locaciones', 'tiposActividad', 'eventos'])
+
 <div class="card card-primary card-outline shadow-sm">
 
     <div class="card-header">
