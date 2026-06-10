@@ -126,8 +126,9 @@
                                         title="Ver detalle">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="btn btn-outline-warning"
+                                <button class="btn btn-outline-warning btn-editar-tabla"
                                         data-id="{{ $usuario->usuario_id }}"
+                                        data-bs-target="#editarModal"
                                         title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
