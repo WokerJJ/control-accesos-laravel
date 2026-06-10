@@ -20,9 +20,7 @@ function initTurboCharts() {
 }
 
 document.addEventListener('DOMContentLoaded', initTurboCharts);
-document.addEventListener('DOMContentLoaded', reinitCardCollapse);
 document.addEventListener('turbo:load', initTurboCharts);
-document.addEventListener('turbo:load', reinitCardCollapse);
 
 // ═══════════════════════════════════════════════
 // Global Chart reference
@@ -522,7 +520,11 @@ document.addEventListener('turbo:frame-load', initCharCounters);
 // new [data-lte-toggle="card-collapse"] buttons lose their handlers.
 // Re-bind by cloning+replacing (removes old listeners) then attaching fresh ones.
 // ═══════════════════════════════════════════════
+reinitCardCollapse._skipFirst = true; // AdminLTE handles initial load
+
 function reinitCardCollapse() {
+  // Skip initial page load — AdminLTE already binds its own handlers on DOMContentLoaded
+  if (reinitCardCollapse._skipFirst) { reinitCardCollapse._skipFirst = false; return; }
   document.querySelectorAll('[data-lte-toggle="card-collapse"]').forEach(btn => {
     // Skip if already bound (AdminLTE adds its own handler)
     if (btn._cardCollapseBound) return;
@@ -544,6 +546,7 @@ function reinitCardCollapse() {
           let display = getComputedStyle(body).display;
           if (display === 'none') display = 'block';
           body.style.display = display;
+          body.offsetHeight; // force reflow
           body.style.overflow = 'hidden';
           const targetH = body.scrollHeight;
           body.style.height = '0';
