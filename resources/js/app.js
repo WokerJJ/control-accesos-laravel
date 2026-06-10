@@ -72,11 +72,17 @@ document.addEventListener('hide.bs.modal', (e) => {
 // ═══════════════════════════════════════════════
 // Accesos modal (AJAX detail)
 // ═══════════════════════════════════════════════
-let _accesosAbortCtrl = null;
+let _accesosFetchCtrl = null;
+let _accesosModalCtrl = null;
 
 function initAccesosModal() {
   const modalEl = document.getElementById('accesoDetalleModal');
   if (!modalEl) return;
+
+  // Clean up old listeners via AbortController
+  if (_accesosModalCtrl) _accesosModalCtrl.abort();
+  _accesosModalCtrl = new AbortController();
+  const signal = _accesosModalCtrl.signal;
 
   const modalBody = document.getElementById('accesoDetalleModalBody');
   const spinner = `
@@ -85,21 +91,18 @@ function initAccesosModal() {
       Cargando...
     </div>`;
 
-  if (modalEl._accesosInit) return;
-  modalEl._accesosInit = true;
-
   modalEl.addEventListener('show.bs.modal', function (e) {
     const id = e.relatedTarget?.dataset?.id;
     if (!id) return;
 
-    if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
-    _accesosAbortCtrl = new AbortController();
+    if (_accesosFetchCtrl) _accesosFetchCtrl.abort();
+    _accesosFetchCtrl = new AbortController();
 
     modalBody.innerHTML = spinner;
 
     fetch(`/admin/accesos/${id}`, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      signal: _accesosAbortCtrl.signal
+      signal: _accesosFetchCtrl.signal
     })
       .then(r => r.text())
       .then(html => { modalBody.innerHTML = html; })
@@ -111,27 +114,32 @@ function initAccesosModal() {
             Error al cargar el detalle
           </div>`;
       });
-  });
+  }, { signal });
 
   modalEl.addEventListener('hidden.bs.modal', function () {
-    if (_accesosAbortCtrl) _accesosAbortCtrl.abort();
+    if (_accesosFetchCtrl) _accesosFetchCtrl.abort();
     modalBody.innerHTML = spinner;
-  });
+  }, { signal });
 }
 
 // ═══════════════════════════════════════════════
 // Usuarios modals (AJAX detail + edit + save)
 // ═══════════════════════════════════════════════
-let _usuariosAbortCtrl = null;
-let _editarAbortCtrl = null;
-let _guardarAbortCtrl = null;
+let _usuariosFetchCtrl = null;
+let _usuariosModalCtrl = null;
+let _editarFetchCtrl = null;
+let _editarModalCtrl = null;
+let _guardarFetchCtrl = null;
+let _usuariosBodyCtrl = null;
 
 function initUsuariosModals() {
   const detalleModalEl = document.getElementById('usuarioDetalleModal');
   if (!detalleModalEl) return;
 
-  if (detalleModalEl._usuariosInit) return;
-  detalleModalEl._usuariosInit = true;
+  // Clean up old listeners via AbortController
+  if (_usuariosModalCtrl) _usuariosModalCtrl.abort();
+  _usuariosModalCtrl = new AbortController();
+  const signal = _usuariosModalCtrl.signal;
 
   const editarModalEl = document.getElementById('editarModal');
   const detalleBody = document.getElementById('usuarioDetalleModalBody');
@@ -152,14 +160,14 @@ function initUsuariosModals() {
     const id = e.relatedTarget?.dataset?.id;
     if (!id) return;
 
-    if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
-    _usuariosAbortCtrl = new AbortController();
+    if (_usuariosFetchCtrl) _usuariosFetchCtrl.abort();
+    _usuariosFetchCtrl = new AbortController();
 
     detalleBody.innerHTML = spinner;
 
     fetch(`/admin/usuarios/${id}`, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      signal: _usuariosAbortCtrl.signal
+      signal: _usuariosFetchCtrl.signal
     })
       .then(r => {
         if (!r.ok) throw new Error('Error ' + r.status);
@@ -181,16 +189,20 @@ function initUsuariosModals() {
             </button>
           </div>`;
       });
-  });
+  }, { signal });
 
   detalleModalEl.addEventListener('hidden.bs.modal', function () {
-    if (_usuariosAbortCtrl) _usuariosAbortCtrl.abort();
+    if (_usuariosFetchCtrl) _usuariosFetchCtrl.abort();
     detalleBody.innerHTML = spinner;
-  });
+  }, { signal });
 
   // ═══════════════════════════════════════════
   // DELEGACIÓN: botón editar dentro del detalle
   // ═══════════════════════════════════════════
+  if (_usuariosBodyCtrl) _usuariosBodyCtrl.abort();
+  _usuariosBodyCtrl = new AbortController();
+  const bodySignal = _usuariosBodyCtrl.signal;
+
   detalleBody.addEventListener('click', function (e) {
     const btn = e.target.closest('.btn-editar');
     if (!btn) return;
@@ -206,11 +218,15 @@ function initUsuariosModals() {
     };
 
     abrirEditar(datos);
-  });
+  }, { signal: bodySignal });
 
   // ═══════════════════════════════════════════
   // MODAL EDITAR (desde tabla o desde detalle)
   // ═══════════════════════════════════════════
+  if (_editarModalCtrl) _editarModalCtrl.abort();
+  _editarModalCtrl = new AbortController();
+  const editarSignal = _editarModalCtrl.signal;
+
   editarModalEl?.addEventListener('show.bs.modal', function (e) {
     const btn = e.relatedTarget;
     if (!btn?.dataset?.id) return;
@@ -218,15 +234,15 @@ function initUsuariosModals() {
     if (!btn.classList.contains('btn-editar')) {
       const id = btn.dataset.id;
 
-      if (_editarAbortCtrl) _editarAbortCtrl.abort();
-      _editarAbortCtrl = new AbortController();
+      if (_editarFetchCtrl) _editarFetchCtrl.abort();
+      _editarFetchCtrl = new AbortController();
 
       fetch(`/admin/usuarios/${id}`, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           'Accept': 'application/json'
         },
-        signal: _editarAbortCtrl.signal
+        signal: _editarFetchCtrl.signal
       })
         .then(r => {
           if (!r.ok) throw new Error('Error ' + r.status);
@@ -246,7 +262,7 @@ function initUsuariosModals() {
           alert('Error al cargar datos para editar');
         });
     }
-  });
+  }, { signal: editarSignal });
 
   window.abrirEditar = function (datos) {
     editarId = datos.id;
@@ -282,8 +298,8 @@ function initUsuariosModals() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
 
-    if (_guardarAbortCtrl) _guardarAbortCtrl.abort();
-    _guardarAbortCtrl = new AbortController();
+    if (_guardarFetchCtrl) _guardarFetchCtrl.abort();
+    _guardarFetchCtrl = new AbortController();
 
     fetch(`/admin/usuarios/${editarId}`, {
       method: 'PUT',
@@ -301,7 +317,7 @@ function initUsuariosModals() {
         rol_id:       document.getElementById('edit_rol_id').value,
         estado:       document.getElementById('edit_estado').value,
       }),
-      signal: _guardarAbortCtrl.signal,
+      signal: _guardarFetchCtrl.signal,
       redirect: 'manual'
     })
       .then(r => {
@@ -341,7 +357,7 @@ function initUsuariosModals() {
         btn.disabled = false;
         btn.innerHTML = textoOriginal;
       });
-  });
+  }, { signal: editarSignal });
 
   function mostrarToast(mensaje, tipo = 'success') {
     const toast = document.createElement('div');
@@ -360,6 +376,8 @@ function initUsuariosModals() {
 // ═══════════════════════════════════════════════
 // Casilleros modal (data attributes)
 // ═══════════════════════════════════════════════
+let _casillerosModalCtrl = null;
+
 function initCasillerosModal() {
   const modal = document.getElementById('modalDetalle');
   if (!modal) return;
@@ -370,8 +388,10 @@ function initCasillerosModal() {
     document.body.appendChild(modal);
   }
 
-  if (modal._casillerosInit) return;
-  modal._casillerosInit = true;
+  // Clean up old listeners via AbortController
+  if (_casillerosModalCtrl) _casillerosModalCtrl.abort();
+  _casillerosModalCtrl = new AbortController();
+  const signal = _casillerosModalCtrl.signal;
 
   modal.addEventListener('show.bs.modal', event => {
     const box = event.relatedTarget;
@@ -382,7 +402,7 @@ function initCasillerosModal() {
     document.getElementById('detallePersona').textContent = box.dataset.persona || 'Libre';
     document.getElementById('detalleActividad').textContent = box.dataset.actividad || '—';
     document.getElementById('detalleHora').textContent = box.dataset.hora || '—';
-  });
+  }, { signal });
 }
 
 // ═══════════════════════════════════════════════
@@ -543,6 +563,17 @@ document.addEventListener('turbo:load', () => {
 // Turbo cleanup: dispose modals + abort pending fetches
 // ═══════════════════════════════════════════════
 document.addEventListener('turbo:before-render', () => {
+  // Abort all modal listeners (guarantees no duplicate listeners)
+  if (_accesosModalCtrl) _accesosModalCtrl.abort();
+  if (_accesosFetchCtrl) _accesosFetchCtrl.abort();
+  if (_usuariosModalCtrl) _usuariosModalCtrl.abort();
+  if (_usuariosFetchCtrl) _usuariosFetchCtrl.abort();
+  if (_usuariosBodyCtrl) _usuariosBodyCtrl.abort();
+  if (_editarModalCtrl) _editarModalCtrl.abort();
+  if (_editarFetchCtrl) _editarFetchCtrl.abort();
+  if (_guardarFetchCtrl) _guardarFetchCtrl.abort();
+  if (_casillerosModalCtrl) _casillerosModalCtrl.abort();
+
   // Dispose all active Bootstrap modal instances
   document.querySelectorAll('.modal.show').forEach(modalEl => {
     const instance = bootstrap.Modal.getInstance(modalEl);
