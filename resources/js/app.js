@@ -570,14 +570,17 @@ document.addEventListener('click', (e) => {
   }
 }, { capture: true });
 
-// Treeview accordion — only toggle on parent items (href="#")
+// Treeview accordion — handles PARENT and child items with href="#" in sidebar
+// After Turbo navigation, AdminLTE's own treeview handler is gone, so this
+// prevents the # from being added to the URL and toggles the submenu.
 document.addEventListener('click', (e) => {
-  const link = e.target.closest('.nav-treeview .nav-item > .nav-link[href="#"]');
+  const link = e.target.closest('.sidebar-menu .nav-link[href="#"]');
   if (!link) return;
   e.preventDefault();
   const li = link.closest('.nav-item');
+  if (!li) return;
   li.classList.toggle('menu-open');
-  const treeview = li.querySelector('.nav-treeview');
+  const treeview = li.querySelector(':scope > .nav-treeview');
   if (treeview) {
     treeview.style.display = li.classList.contains('menu-open') ? 'block' : 'none';
   }
