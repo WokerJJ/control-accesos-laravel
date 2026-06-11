@@ -47,7 +47,7 @@ class AjustesController extends Controller
             'municipio_id' => $request->municipio_id ?: null,
         ]);
 
-        return redirect()->route('admin.ajustes')
+        return redirect()->route('admin.ajustes.index')
             ->with('success', 'Perfil actualizado correctamente.');
     }
 
