@@ -76,6 +76,18 @@ document.addEventListener('hide.bs.modal', (e) => {
 let _modalFetchCtrl = null;
 let _editarId = null;
 
+// ═══════════════════════════════════════════════
+// Base URL helper (reads from <meta name="base-url">)
+// Ensures fetch() works correctly in subfolder deployments
+// ═══════════════════════════════════════════════
+let _cachedBaseUrl = null;
+function _baseUrl() {
+  if (_cachedBaseUrl === null) {
+    _cachedBaseUrl = (document.querySelector('meta[name="base-url"]')?.content || '').replace(/\/+$/, '');
+  }
+  return _cachedBaseUrl;
+}
+
 function _ensureFetchCtrl() {
   if (_modalFetchCtrl) _modalFetchCtrl.abort();
   _modalFetchCtrl = new AbortController();
@@ -97,7 +109,7 @@ document.addEventListener('show.bs.modal', (e) => {
     const body = document.getElementById('accesoDetalleModalBody');
     const signal = _ensureFetchCtrl();
     body.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin fa-2x mb-2 d-block"></i>Cargando...</div>';
-    fetch(`/admin/accesos/${id}`, {
+    fetch(`${_baseUrl()}/admin/accesos/${id}`, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       signal
     })
@@ -119,7 +131,7 @@ document.addEventListener('show.bs.modal', (e) => {
     const body = document.getElementById('usuarioDetalleModalBody');
     const signal = _ensureFetchCtrl();
     body.innerHTML = '<div class="text-center text-muted py-5"><div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mb-0">Cargando información...</p></div>';
-    fetch(`/admin/usuarios/${id}`, {
+    fetch(`${_baseUrl()}/admin/usuarios/${id}`, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       signal
     })
@@ -213,7 +225,7 @@ document.addEventListener('click', (e) => {
   const id = btn.dataset.id;
   if (!id) return;
   const signal = _ensureFetchCtrl();
-  fetch(`/admin/usuarios/${id}`, {
+  fetch(`${_baseUrl()}/admin/usuarios/${id}`, {
     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
     signal
   })
@@ -244,7 +256,7 @@ document.addEventListener('click', (e) => {
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
 
   const signal = _ensureFetchCtrl();
-  fetch(`/admin/usuarios/${_editarId}`, {
+  fetch(`${_baseUrl()}/admin/usuarios/${_editarId}`, {
     method: 'PUT',
     headers: {
       'Content-Type':     'application/json',

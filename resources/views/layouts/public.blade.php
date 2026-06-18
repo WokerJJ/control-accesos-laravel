@@ -6,15 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('titulo', 'Control de Accesos')</title>
 
+    <meta name="base-url" content="{{ url('/') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700&display=fallback">
-    <link rel="stylesheet" href="/adminlte/plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="/adminlte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
     
     @stack('styles')
     @vite(['resources/js/app.js'])
-    <script src="/adminlte/plugins/jquery/jquery.min.js"></script>
-    <script src="/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/adminlte/dist/js/adminlte.min.js"></script>
+    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
 </head>
 <body class="hold-transition" style="background: #1a1a2e;">
 
