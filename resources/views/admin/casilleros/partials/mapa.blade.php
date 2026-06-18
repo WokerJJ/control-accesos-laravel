@@ -22,6 +22,8 @@
 
                 data-codigo="{{ $casillero['codigo'] }}"
                 data-estado="{{ $casillero['estado'] }}"
+                data-es-externo="{{ $casillero['es_externo'] ? '1' : '0' }}"
+                data-usos="{{ $casillero['total_usos'] }}"
                 data-persona="{{ $casillero['persona'] }}"
                 data-actividad="{{ $casillero['actividad'] }}"
                 data-hora="{{ $casillero['hora_ingreso'] }}"

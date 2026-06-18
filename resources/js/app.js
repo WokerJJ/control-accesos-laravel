@@ -157,11 +157,27 @@ document.addEventListener('show.bs.modal', (e) => {
   // ── Casilleros detail (read data attributes from clicked box) ──
   if (modalEl.id === 'modalDetalle' && related?.dataset?.codigo) {
     const d = related.dataset;
+    const esExterno = d.esExterno === '1';
     document.getElementById('detalleCodigo').textContent = d.codigo;
-    document.getElementById('detalleEstado').textContent = d.estado;
-    document.getElementById('detallePersona').textContent = d.persona || 'Libre';
-    document.getElementById('detalleActividad').textContent = d.actividad || '—';
-    document.getElementById('detalleHora').textContent = d.hora || '—';
+
+    const infoNormal = document.getElementById('detalleInfoNormal');
+    const infoExterno = document.getElementById('detalleInfoExterno');
+
+    if (esExterno) {
+      // Casillero externo: solo mostrar estado + usos
+      infoNormal?.classList.add('d-none');
+      infoExterno?.classList.remove('d-none');
+      document.getElementById('detalleEstadoExterno').textContent = d.estado;
+      document.getElementById('detalleUsos').textContent = d.usos ?? '0';
+    } else {
+      // Casillero normal: mostrar persona, actividad, hora
+      infoNormal?.classList.remove('d-none');
+      infoExterno?.classList.add('d-none');
+      document.getElementById('detalleEstado').textContent = d.estado;
+      document.getElementById('detallePersona').textContent = d.persona || 'Libre';
+      document.getElementById('detalleActividad').textContent = d.actividad || '—';
+      document.getElementById('detalleHora').textContent = d.hora || '—';
+    }
   }
 });
 
@@ -483,10 +499,25 @@ document.addEventListener('turbo:before-render', () => {
 });
 
 // ═══════════════════════════════════════════════
-// AdminLTE sidebar
-// Handled natively by adminlte.min.js via data-lte-toggle="sidebar"
-// No custom handler needed — it conflicts with AdminLTE's built-in logic
+// AdminLTE sidebar — Turbo-compatible re-init
+// AdminLTE's PushMenu only initializes on DOMContentLoaded, but
+// Turbo replaces the DOM on navigation, killing the listeners.
+// We re-create PushMenu after each Turbo load.
 // ═══════════════════════════════════════════════
+function initSidebar() {
+  if (typeof AdminLTE === 'undefined' || !AdminLTE.PushMenu) return;
+  const el = document.querySelector('.app-sidebar');
+  if (!el) return;
+  // First load: AdminLTE already created an instance via DOMContentLoaded — skip
+  if (typeof document.body._pushMenu === 'undefined') {
+    document.body._pushMenu = true; // mark as initialized by AdminLTE
+    return;
+  }
+  // Subsequent Turbo loads: re-create PushMenu with new DOM elements
+  document.body._pushMenu = new AdminLTE.PushMenu(el);
+}
+
+document.addEventListener('turbo:load', initSidebar);
 
 // ═══════════════════════════════════════════════
 // Character counters for inputs with maxlength
