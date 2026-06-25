@@ -20,9 +20,9 @@ class UsuarioController extends Controller
             'stats'    => $this->usuarioService->obtenerStats(),
             'usuarios' => $this->usuarioService->obtenerListado($request),
             'roles'    => \App\Models\Rol::orderBy('nombre_rol')->get(['id', 'nombre_rol']),
-            'municipios' => \App\Models\Municipio::with('departamento:id,nombre')
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'departamento_id']),
+            'departamentos' => \App\Models\Departamento::orderBy('nombre')
+                ->with('municipios:id,nombre,departamento_id')
+                ->get(['id', 'nombre']),
         ]);
     }
 
@@ -39,9 +39,10 @@ class UsuarioController extends Controller
                 'email'        => $usuario->email,
                 'celular'      => $usuario->celular,
                 'direccion'    => $usuario->direccion,
-                'municipio_id' => $usuario->municipio_id,
-                'rol_id'       => $usuario->rol_id,
-                'estado'       => $usuario->estado,
+                'departamento_id' => $usuario->departamento_id,
+                'municipio_id'    => $usuario->municipio_id,
+                'rol_id'          => $usuario->rol_id,
+                'estado'          => $usuario->estado,
             ]);
         }
 
@@ -54,7 +55,7 @@ class UsuarioController extends Controller
         $usuario = $this->usuarioService->obtenerDetalle($user->persona_id);
         $request->validate([
             'email'        => 'nullable|email|max:150',
-            'celular'      => 'nullable|string|max:20',
+            'celular'      => 'nullable|string|max:15|regex:/^[0-9]+$/',
             'direccion'    => 'nullable|string|max:200',
             'municipio_id' => 'nullable|exists:municipio,id',
             'rol_id'       => 'required|exists:roles,id',

@@ -15,8 +15,8 @@ class Persona extends Model
     protected $fillable = [
         'tipo_identificacion_id', 'doc_identidad', 'primer_nombre',
         'segundo_nombre', 'primer_apellido', 'segundo_apellido',
-        'email', 'celular', 'plan', 'direccion',
-        'municipio_id', 'estado', 'fecha_registro'
+        'email', 'celular', 'programa_academico_id', 'codigo_institucional',
+        'direccion', 'municipio_id', 'estado', 'fecha_registro'
     ];
 
     protected $casts = [
@@ -37,6 +37,16 @@ class Persona extends Model
     public function municipio(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Municipio::class);
+    }
+
+    public function programaAcademico(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\ProgramaAcademico::class, 'programa_academico_id');
+    }
+
+    public function tipoIdentificacion(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\TipoIdentificacion::class, 'tipo_identificacion_id');
     }
 
     // ─── Accessors ───────────────────────────────────
@@ -88,5 +98,15 @@ class Persona extends Model
             ->where('estado', 'en_curso')
             ->latest()
             ->first();
+    }
+
+    public function esEstudiante(): bool
+    {
+        return $this->programaAcademico?->tipo === 'carrera';
+    }
+
+    public function esExterno(): bool
+    {
+        return $this->programaAcademico?->tipo === 'externo';
     }
 }

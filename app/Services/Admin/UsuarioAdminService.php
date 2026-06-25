@@ -32,13 +32,15 @@ class UsuarioAdminService
                 'primer_nombre', 'segundo_nombre',
                 'primer_apellido', 'segundo_apellido',
                 'email', 'celular',
-                'municipio_id', 'created_at',
+                'municipio_id', 'programa_academico_id',
+                'created_at',
             ])
             ->with([
                 'usuario:id,persona_id,rol_id,ultimo_acceso,estado',
-                'usuario.rol:id,nombre_rol',        // ← para mostrar el nombre del rol
+                'usuario.rol:id,nombre_rol',
+                'programaAcademico:id,nombre,tipo',
             ])
-            ->withCount('accesos')              // ← total histórico de ingresos
+            ->withCount('accesos')
 
             // ── Filtros ───────────────────────────────────
             ->when($request->buscar, function ($q, $buscar) {
@@ -64,6 +66,12 @@ class UsuarioAdminService
                     default => null,
                 };
             })
+            ->when($request->area, function ($q, $area) {
+                $tipo = \App\Models\ProgramaAcademico::tipoFromArea($area);
+                if ($tipo) {
+                    $q->whereHas('programaAcademico', fn($q) => $q->where('tipo', $tipo));
+                }
+            })
 
             ->latest()
             ->paginate(15)
@@ -73,9 +81,14 @@ class UsuarioAdminService
                 'usuario_id'     => $persona->usuario?->id,
                 'nombre_completo'=> $persona->nombre_completo,
                 'doc_identidad'  => $persona->doc_identidad,
-                'celular'        => $persona->celular,           // ← corregido
+                'celular'        => $persona->celular,
                 'email'          => $persona->email,
                 'rol'            => $persona->usuario?->rol?->nombre_rol ?? '—',
+                'area'           => \App\Models\ProgramaAcademico::areaLabel($persona->programaAcademico?->tipo),
+                'area_color'     => \App\Models\ProgramaAcademico::areaColor($persona->programaAcademico?->tipo),
+                'programa'       => $persona->programaAcademico?->tipo === 'carrera'
+                    ? $persona->programaAcademico?->nombre
+                    : null,
                 'estado'         => $persona->usuario?->estado ?? 'inactivo',
                 'activo'         => $persona->usuario?->estado === 'activo',
                 'ultimo_acceso'  => $persona->usuario?->ultimo_acceso
@@ -93,21 +106,31 @@ class UsuarioAdminService
                 'usuario.rol:id,nombre_rol',
                 'municipio:id,nombre,departamento_id',
                 'municipio.departamento:id,nombre',
+                'programaAcademico:id,nombre,tipo',
+                'tipoIdentificacion:id,abreviatura',
             ])
             ->withCount('accesos')
             ->findOrFail($personaId);
 
         return (object) [
-            'id'              => $persona->id,
-            'usuario_id'      => $persona->usuario?->id,
-            'nombre_completo' => $persona->nombre_completo,
-            'doc_identidad'   => $persona->doc_identidad,
-            'email'           => $persona->email,
-            'celular'         => $persona->celular,
+            'id'                    => $persona->id,
+            'usuario_id'            => $persona->usuario?->id,
+            'nombre_completo'       => $persona->nombre_completo,
+            'doc_identidad'         => $persona->doc_identidad,
+            'tipo_identificacion'   => $persona->tipoIdentificacion?->abreviatura ?? '—',
+            'codigo_institucional'  => $persona->codigo_institucional,
+            'email'                 => $persona->email,
+            'celular'               => $persona->celular,
             'direccion'       => $persona->direccion,
             'municipio'       => $persona->municipio?->nombre,
             'departamento'    => $persona->municipio?->departamento?->nombre,
+            'departamento_id' => $persona->municipio?->departamento_id,
             'municipio_id'    => $persona->municipio_id,
+            'area'            => \App\Models\ProgramaAcademico::areaLabel($persona->programaAcademico?->tipo),
+            'area_color'      => \App\Models\ProgramaAcademico::areaColor($persona->programaAcademico?->tipo),
+            'programa'        => $persona->programaAcademico?->tipo === 'carrera'
+                ? $persona->programaAcademico?->nombre
+                : null,
             'rol'             => $persona->usuario?->rol?->nombre_rol ?? '—',
             'rol_id'          => $persona->usuario?->rol_id,
             'estado'          => $persona->usuario?->estado ?? 'inactivo',

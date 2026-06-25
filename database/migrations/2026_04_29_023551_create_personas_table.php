@@ -24,7 +24,12 @@ return new class extends Migration
             $table->string('segundo_apellido', 50)->nullable();
             $table->string('email', 100)->nullable()->unique();
             $table->string('celular', 15)->nullable();
-            $table->integer('plan')->default(000);
+            $table->foreignId('programa_academico_id')
+                ->constrained('programas_academicos')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
+            $table->string('codigo_institucional', 20)
+                ->default('EXTERNO');
             $table->text('direccion')->nullable();
             $table->foreignId('municipio_id')
                 ->nullable()

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CrearActividadProgramadaRequest;
 use App\Models\Actividad;
 use App\Services\ActividadService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -43,10 +44,14 @@ class ActividadController extends Controller
             ->with('success', 'Actividad actualizada correctamente.');
     }
 
-    public function eliminar(Actividad $actividad): RedirectResponse
+    public function eliminar(Actividad $actividad): JsonResponse|RedirectResponse
     {
         // Solo cancelar — nunca borrar registros con accesos asociados
         $this->actividadService->cancelarProgramada($actividad);
+
+        if (request()->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => 'Actividad cancelada correctamente.']);
+        }
 
         return redirect()->route('admin.actividades.index')
             ->with('success', 'Actividad cancelada correctamente.');

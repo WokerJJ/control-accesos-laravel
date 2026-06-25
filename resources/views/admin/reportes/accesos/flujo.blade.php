@@ -13,33 +13,29 @@
 <div class="container-fluid">
 
     {{-- ── Filtros ──────────────────────────────────── --}}
-    <x-dashboard.filtro-card action="{{ route('admin.reportes.accesos.flujo') }}" col-boton="2">
+    <x-dashboard.filtro-card action="{{ route('admin.reportes.accesos.flujo') }}" >
         <x-slot:campos>
 
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Fecha</label>
-                    <input type="date"
-                           name="fecha"
-                           class="form-control"
-                           value="{{ $fecha }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Fecha</label>
+                <input type="date"
+                       name="fecha"
+                       class="form-control"
+                       value="{{ $fecha }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
 
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Locación</label>
-                    <select name="locacion_id" class="form-control">
-                        <option value="">Todas las locaciones</option>
-                        @foreach($locaciones as $loc)
-                        <option value="{{ $loc->id }}"
-                                @selected($locacionId == $loc->id)>
-                            {{ $loc->nombre }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="form-group filtro-field-wide">
+                <label>Locación</label>
+                <select name="locacion_id" class="form-control">
+                    <option value="">Todas las locaciones</option>
+                    @foreach($locaciones as $loc)
+                    <option value="{{ $loc->id }}"
+                            @selected($locacionId == $loc->id)>
+                        {{ $loc->nombre }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
         </x-slot:campos>
@@ -126,7 +122,6 @@
         {{-- Franjas horarias --}}
         <div class="col-md-4">
             <x-admin.data-table
-                icon="fas fa-th-large"
                 title="Franjas horarias"
                 hover
                 full-height
@@ -166,7 +161,6 @@
         {{-- Detalle por hora --}}
         <div class="col-md-8">
             <x-admin.data-table
-                icon="fas fa-table"
                 title="Detalle por hora"
                 hover
                 small

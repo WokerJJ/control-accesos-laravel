@@ -22,7 +22,8 @@ class AccesoController extends Controller
                 $request->only([
                     'estado',
                     'fecha',
-                    'buscar'
+                    'buscar',
+                    'area',
                 ])
             ),
         ]);
@@ -31,7 +32,8 @@ class AccesoController extends Controller
     public function show(Acceso $acceso): \Illuminate\Http\Response
     {
         $acceso->load([
-            'persona:id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,doc_identidad,email,celular',
+            'persona:id,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,doc_identidad,email,celular,programa_academico_id',
+            'persona.programaAcademico:id,nombre,tipo',
             'actividad:id,nombre',
             'locacion:id,nombre',
             'casillero:id,codigo',

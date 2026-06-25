@@ -16,16 +16,17 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            TipoIdentificacionSeeder::class,
+            // TipoIdentificacionSeeder::class,
+            // ProgramaAcademicoSeeder::class,
             RolesSeeder::class,
             DepartamentoSeeder::class,
             MunicipioSeeder::class,
             LocacionSeeder::class,
             TipoActividadSeeder::class,
             ActividadesSeeder::class,
-            UsuarioSeeder::class,
+            //UsuarioSeeder::class,
             CasilleroSeeder::class,
-            AccesoSeeder::class,
+            //AccesoSeeder::class,
         ]);
     }
 }

@@ -11,27 +11,202 @@
 }
 
 /* ═══════════════════════════════════════════════
-   Fix: Bootstrap modals with Tailwind CSS v4
-   Tailwind preflight resets border/color styles
-   that break Bootstrap's modal backdrop + dialog.
+   Sidebar collapse — hide user info + center avatar
+   AdminLTE hides nav-link p / brand-text but NOT .user-panel .info
    ═══════════════════════════════════════════════ */
-.modal {
-    z-index: 1050 !important;
+.sidebar-mini.sidebar-collapse .user-panel .info { display: none !important; }
+.sidebar-mini.sidebar-collapse .user-panel .img-circle { margin: 0 auto; }
+.sidebar-mini.sidebar-collapse .user-panel .d-flex { justify-content: center; }
+.sidebar-mini.sidebar-collapse .sidebar-brand .brand-text { display: none !important; }
+
+/* ═══════════════════════════════════════════════
+   Bootstrap modals — z-index fix with Tailwind v4
+   ═══════════════════════════════════════════════ */
+.modal { z-index: 1050 !important; }
+.modal-backdrop { z-index: 1040 !important; background-color: rgba(0, 0, 0, 0.5) !important; }
+.modal-backdrop.show { opacity: 0.5 !important; }
+.modal-content { background-color: #fff !important; border: 1px solid rgba(0, 0, 0, 0.2) !important; border-radius: 0.5rem !important; }
+.app-main { isolation: auto !important; }
+
+/* ═══════════════════════════════════════════════
+   KPI stat-box — prevent overflow on mobile
+   ═══════════════════════════════════════════════ */
+.small-box .inner { min-width: 0; }
+.small-box .inner h3 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.small-box .inner p  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 991.98px) {
+    .small-box .small-box-icon { display: none; }
 }
-.modal-backdrop {
-    z-index: 1040 !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+@media (max-width: 767.98px) {
+    .small-box .inner h3 { font-size: 1.15rem; }
+    .small-box .inner p  { font-size: 0.75rem; }
+    .info-box-content .info-box-number { font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .info-box-content .info-box-text   { font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
-.modal-backdrop.show {
-    opacity: 0.5 !important;
-}
-.modal-content {
-    background-color: #fff !important;
-    border: 1px solid rgba(0, 0, 0, 0.2) !important;
-    border-radius: 0.5rem !important;
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .small-box .inner h3 { font-size: 1.35rem; }
 }
 
-/* AdminLTE layout: break stacking context so position:fixed modals escape */
-.app-main {
-    isolation: auto !important;
+/* ═══════════════════════════════════════════════
+   Filter card — redesigned for better alignment
+   ═══════════════════════════════════════════════ */
+.filtro-card .card-body { padding: 1.25rem 1.5rem; }
+.filtro-card .form-group label { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: #6c757d; margin-bottom: 0.35rem; }
+.filtro-card .form-control,
+.filtro-card select.form-control { border-radius: 0.375rem; border-color: #dee2e6; font-size: 0.875rem; padding: 0.45rem 0.75rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.filtro-card .form-control:focus,
+.filtro-card select.form-control:focus { border-color: #007bff; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15); }
+
+/* ── Filter row: flex layout ── */
+.filtro-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+.filtro-row > .form-group,
+.filtro-row > [class*="col-"] {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.filtro-row > .form-group { margin-bottom: 0; }
+
+/* ── Filter field: wide variant ── */
+.filtro-field-wide { flex: 2; }
+
+/* ── Filter actions: button group ── */
+.filtro-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding-bottom: 2px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.filtro-actions .btn {
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+/* ── Mobile: stack everything ── */
+@media (max-width: 767.98px) {
+    .filtro-row {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    .filtro-row > .form-group,
+    .filtro-row > [class*="col-"] {
+        flex: 0 0 100%;
+    }
+    .filtro-actions {
+        flex: 0 0 100%;
+        justify-content: stretch;
+    }
+    .filtro-actions .btn {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* ── Tablet: 2 per row ── */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .filtro-row > .form-group,
+    .filtro-row > [class*="col-"] {
+        flex: 0 0 calc(50% - 0.375rem);
+    }
+    .filtro-actions {
+        flex: 0 0 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* ═══════════════════════════════════════════════
+   Mobile card layout (< 768px)
+   Tables with .table-mobile-cards transform rows
+   into stacked cards with label | value cells.
+   ═══════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+
+    .table-responsive { border: none !important; }
+
+    /* ── Table shell ── */
+    .table-mobile-cards thead { display: none; }
+    .table-mobile-cards tbody { display: block; }
+
+    /* ── Card row ── */
+    .table-mobile-cards tbody tr {
+        display: flex;
+        flex-wrap: wrap;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 0.7rem 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* ── Every data cell ── */
+    .table-mobile-cards tbody td {
+        flex: 0 0 100%;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.25rem 0;
+        font-size: 0.82rem;
+        border: none;
+    }
+
+    /* ── Name row (first cell) ── */
+    .table-mobile-cards tbody td:first-child {
+        justify-content: center;
+        gap: 0.4rem;
+        padding-bottom: 0.35rem;
+        margin-bottom: 0.15rem;
+        border-bottom: 1px solid #eee;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #212529;
+    }
+    .table-mobile-cards tbody td:first-child::before { display: none; }
+
+    /* ── Action row (last cell) ── */
+    .table-mobile-cards tbody td:last-child {
+        justify-content: center;
+        padding-top: 0.35rem;
+        margin-top: 0.15rem;
+        border-top: 1px solid #eee;
+    }
+    .table-mobile-cards tbody td:last-child::before { display: none; }
+    .table-mobile-cards tbody td:last-child .btn-group { gap: 0.5rem; }
+
+    /* ── Label via ::before ── */
+    .table-mobile-cards tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        color: #495057;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    .table-mobile-cards tbody td:not([data-label])::before { display: none; }
+
+    /* ── Contacto column: prevent overflow in card mode ── */
+    .table-mobile-cards tbody td[data-label="Contacto"] {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .table-mobile-cards tbody td[data-label="Contacto"]::before {
+        align-self: flex-start;
+    }
+
+    /* ── Badges ── */
+    .table-mobile-cards tbody td .badge { font-size: 0.68rem; padding: 0.18rem 0.45rem; }
+
+    /* ── En-curso row: green left border ── */
+    .table-mobile-cards tbody tr.row-en-curso { border-left: 3px solid #28a745; }
+
+    /* ── Pagination ── */
+    .card-footer .pagination { justify-content: center; margin-bottom: 0; }
+    .card-footer .pagination .page-link { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
 }

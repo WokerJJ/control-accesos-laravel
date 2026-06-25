@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+    Options -MultiViews -Indexes
+
+    RewriteEngine On
+
+    # ── Subpath bridge: forward everything into public/ ──
+    # When the Document Root is public_html/ and the Laravel app
+    # lives at public_html/control-accesos/, this .htaccess forwards
+    # every request into the public/ directory so that Laravel's
+    # own .htaccess and index.php can handle routing.
+    #
+    # Forward: anything → public/anything
+    # The [L] flag stops processing this file; Apache will then
+    # process public/.htaccess for the rewritten path.
+    RewriteRule ^(.+)$ public/$1 [L]
+
+    # ── Root request (empty path) → serve public/ directory ──
+    # When the path is empty (/control-accesos/ or /control-accesos),
+    # Apache will serve public/ via its directory index (index.php).
+    RewriteRule ^$ public/index.php [L]
+</IfModule>

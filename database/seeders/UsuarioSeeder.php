@@ -14,6 +14,8 @@ class UsuarioSeeder extends Seeder
         $usuarios = [];
         $personas = [];
 
+        $externoId = DB::table('programas_academicos')->where('codigo', '0003')->value('id');
+
         for ($i = 1; $i <= 200; $i++) {
 
             $personas[] = [
@@ -22,7 +24,8 @@ class UsuarioSeeder extends Seeder
                 'primer_nombre' => 'User' . $i,
                 'primer_apellido' => 'Test',
                 'email' => "user{$i}@mail.com",
-                'plan' => 1,
+                'programa_academico_id' => $externoId,
+                'codigo_institucional' => 'EXTERNO',
                 'estado' => 'activo',
                 'fecha_registro' => now(),
                 'created_at' => now(),

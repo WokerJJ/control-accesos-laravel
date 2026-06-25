@@ -48,6 +48,14 @@
                         <span>{{ $acceso->persona->celular }}</span>
                     </div>
                     @endif
+                    <div class="col-md-6 mt-2">
+                        <small class="text-muted d-block">Área</small>
+                        @php $tipo = $acceso->persona->programaAcademico?->tipo; @endphp
+                        <span class="badge bg-{{ \App\Models\ProgramaAcademico::areaColor($tipo) }}">{{ \App\Models\ProgramaAcademico::areaLabel($tipo) }}</span>
+                        @if($tipo === 'carrera')
+                        <small class="d-block text-muted mt-1">{{ $acceso->persona->programaAcademico->nombre }}</small>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

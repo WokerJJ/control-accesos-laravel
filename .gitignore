@@ -34,3 +34,7 @@ npm-debug.log
 yarn-error.log
 /.claude
 .claude/
+
+# Datos sensibles
+archivo.csv
+nul

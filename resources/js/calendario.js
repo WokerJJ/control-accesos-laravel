@@ -25,11 +25,11 @@ let calendarInstance = null
 let resizeHandler = null
 
 // ═══════════════════════════════════════════════
-// Bootstrap (Turbo-compatible)
+// Bootstrap
 // ═══════════════════════════════════════════════
 
 export function initCalendar() {
-    // Destruir instancia anterior si existe (al navegar con Turbo)
+    // Destruir instancia anterior si existe
     if (calendarInstance) {
         calendarInstance.destroy()
         calendarInstance = null
@@ -67,6 +67,8 @@ export function initCalendar() {
         if (methodInput) methodInput.remove()
 
         formActividad.reset()
+        formActividad.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'))
+        formActividad.querySelectorAll('.invalid-feedback').forEach(el => el.remove())
 
         document.getElementById('modalTitulo').textContent = 'Nueva actividad programada'
         document.getElementById('modalIcon').className     = 'fas fa-calendar-plus me-2 text-primary'
@@ -87,6 +89,9 @@ export function initCalendar() {
     }
 
     function modoEditar(evento) {
+        formActividad.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'))
+        formActividad.querySelectorAll('.invalid-feedback').forEach(el => el.remove())
+
         const props = evento.extendedProps
 
         document.getElementById('wrapEstado')?.classList.remove('d-none')
@@ -121,6 +126,7 @@ export function initCalendar() {
         formActividad.querySelector('[name=estado]').value            = props.estado_db ?? 'pendiente'
 
         // Guardar ID para eliminar
+        formActividad.dataset.eventoId = evento.id
         formEliminar.action = ROUTE_DELETE.replace('__ID__', evento.id)
         wrapEliminar?.classList.remove('d-none')
     }
@@ -261,7 +267,7 @@ export function initCalendar() {
         })
     }
 
-    // Limpiar listener anterior para evitar leaks entre navegaciones Turbo
+    // Limpiar listener anterior para evitar memory leaks
     if (resizeHandler) window.removeEventListener('resize', resizeHandler)
     let resizeTimer = null
     resizeHandler = () => {
@@ -273,11 +279,4 @@ export function initCalendar() {
         }, 200)
     }
     window.addEventListener('resize', resizeHandler)
-}
-
-export function destroyCalendar() {
-    if (calendarInstance) {
-        calendarInstance.destroy()
-        calendarInstance = null
-    }
 }

@@ -94,12 +94,14 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">Celular</label>
-                                <input type="text"
+                                <input type="tel"
                                        name="celular"
                                        class="form-control @error('celular') is-invalid @enderror"
                                        value="{{ old('celular', $persona->celular) }}"
                                        placeholder="3001234567"
-                                       maxlength="15">
+                                       maxlength="15"
+                                       inputmode="numeric" pattern="[0-9]*"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                 @error('celular')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror

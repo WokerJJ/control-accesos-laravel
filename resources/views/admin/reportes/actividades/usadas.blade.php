@@ -13,39 +13,33 @@
 <div class="container-fluid">
 
     {{-- ── Filtros ──────────────────────────────────── --}}
-    <x-dashboard.filtro-card action="{{ route('admin.reportes.actividades.usadas') }}" col-boton="2">
+    <x-dashboard.filtro-card action="{{ route('admin.reportes.actividades.usadas') }}" >
         <x-slot:campos>
 
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Desde</label>
-                    <input type="date" name="desde" class="form-control"
-                           value="{{ $desde }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Desde</label>
+                <input type="date" name="desde" class="form-control"
+                       value="{{ $desde }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
 
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Hasta</label>
-                    <input type="date" name="hasta" class="form-control"
-                           value="{{ $hasta }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Hasta</label>
+                <input type="date" name="hasta" class="form-control"
+                       value="{{ $hasta }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
 
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Locación</label>
-                    <select name="locacion_id" class="form-control">
-                        <option value="">Todas las locaciones</option>
-                        @foreach($locaciones as $loc)
-                        <option value="{{ $loc->id }}" @selected($locacionId == $loc->id)>
-                            {{ $loc->nombre }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="form-group filtro-field-wide">
+                <label>Locación</label>
+                <select name="locacion_id" class="form-control">
+                    <option value="">Todas las locaciones</option>
+                    @foreach($locaciones as $loc)
+                    <option value="{{ $loc->id }}" @selected($locacionId == $loc->id)>
+                        {{ $loc->nombre }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
         </x-slot:campos>
@@ -93,14 +87,14 @@
         {{-- Tabla ranking --}}
         <div class="col-md-7">
             <x-admin.data-table
-                icon="fas fa-trophy"
                 title="Ranking del período"
                 full-height
+                responsive
             >
                 <x-slot:tools>
                     <div class="d-flex justify-content-end">
                         <a href="{{ route('admin.reportes.export.actividades.csv', request()->query()) }}"
-                           class="btn btn-sm btn-success export-btn" data-turbo="false">
+                           class="btn btn-sm btn-success export-btn">
                             <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                         </a>
                     </div>
@@ -110,11 +104,11 @@
                 <tr>
                     <th>#</th>
                     <th>Actividad</th>
-                    <th>Locación</th>
+                    <th class="d-none d-md-table-cell">Locación</th>
                     <th class="text-end">Usos</th>
-                    <th>Participación</th>
-                    <th>Últ. uso</th>
-                    <th>Prom.</th>
+                    <th class="d-none d-lg-table-cell">Participación</th>
+                    <th class="d-none d-lg-table-cell">Últ. uso</th>
+                    <th class="d-none d-md-table-cell">Prom.</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -138,11 +132,11 @@
                             {{ ucfirst($actividad->tipo) }}
                         </span>
                     </td>
-                    <td>
+                    <td class="d-none d-md-table-cell">
                         <small class="text-muted">{{ $actividad->locacion }}</small>
                     </td>
                     <td class="text-end fw-bold">{{ $actividad->total_usos }}</td>
-                    <td style="min-width:120px;">
+                    <td class="d-none d-lg-table-cell" style="min-width:120px;">
                         <div class="d-flex align-items-center gap-1">
                             <div class="progress flex-grow-1" style="height:6px;">
                                 <div class="progress-bar bg-primary"
@@ -151,10 +145,10 @@
                             <small class="text-muted">{{ $actividad->porcentaje }}%</small>
                         </div>
                     </td>
-                    <td>
+                    <td class="d-none d-lg-table-cell">
                         <small class="text-muted">{{ $actividad->ultimo_uso }}</small>
                     </td>
-                    <td>
+                    <td class="d-none d-md-table-cell">
                         <small class="text-muted">{{ $actividad->duracion_promedio }}</small>
                     </td>
                 </tr>

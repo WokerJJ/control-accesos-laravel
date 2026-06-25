@@ -1,5 +1,4 @@
 @props([
-    'icon'          => null,
     'title'         => '',
     'variant'       => 'primary',
     'count'         => null,
@@ -11,6 +10,7 @@
     'theadVariant'  => 'light',
     'shadow'        => false,
     'fullHeight'    => false,
+    'responsive'    => false,
 ])
 
 @php
@@ -22,15 +22,13 @@
     if ($striped) $tableClasses .= ' table-striped';
     if ($align)   $tableClasses .= ' align-middle';
     if ($small)   $tableClasses .= ' table-sm';
+    if ($responsive) $tableClasses .= ' table-mobile-cards';
 @endphp
 
 <div class="{{ $cardClasses }}">
 
     <div class="card-header">
         <h3 class="card-title">
-            @if($icon)
-                <i class="{{ $icon }} mr-2"></i>
-            @endif
             {{ $title }}
             @if($count !== null)
                 <span class="badge bg-{{ $variant }} ms-1">{{ $count }}</span>
@@ -40,11 +38,11 @@
             @endif
         </h3>
 
-        @if(isset($tools) && $tools)
-            <div class="card-tools">
+        <div class="card-tools d-flex align-items-center gap-1">
+            @if(isset($tools) && $tools)
                 {{ $tools }}
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 
     <div class="card-body p-0">

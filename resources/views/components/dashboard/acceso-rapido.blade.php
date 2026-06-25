@@ -20,10 +20,10 @@
             Registrar salida
         </a>
 
-        <a href="#"
+        <a href="{{ route('admin.reportes.accesos.resumen') }}"
            class="btn btn-secondary">
             <i class="fas fa-file-export me-2"></i>
-            Exportar reporte
+            Ver reportes
         </a>
 
     </div>

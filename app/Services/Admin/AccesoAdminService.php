@@ -38,10 +38,11 @@ class AccesoAdminService
 
         return Acceso::query()
             ->with([
-                'persona:id,doc_identidad,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido',
+                'persona:id,doc_identidad,primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,programa_academico_id',
+                'persona.programaAcademico:id,nombre,tipo',
                 'actividad:id,nombre',
-                'casillero:id,codigo',   // ← para el modal
-                'locacion:id,nombre',    // ← para el modal
+                'casillero:id,codigo',
+                'locacion:id,nombre',
             ])
             ->when($filtros['estado'] ?? null,
                 fn($q, $estado) => $q->where('estado', $estado)
@@ -68,6 +69,12 @@ class AccesoAdminService
                     });
                 }
             )
+            ->when($filtros['area'] ?? null, function ($q, $area) {
+                $tipo = \App\Models\ProgramaAcademico::tipoFromArea($area);
+                if ($tipo) {
+                    $q->whereHas('persona.programaAcademico', fn($pq) => $pq->where('tipo', $tipo));
+                }
+            })
             ->latest('hora_ingreso')
             ->paginate(15)
             ->withQueryString();

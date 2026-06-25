@@ -13,60 +13,50 @@
 <div class="container-fluid">
 
     {{-- ── Filtros ──────────────────────────────────── --}}
-    <x-dashboard.filtro-card action="{{ route('admin.reportes.accesos.historico') }}" col-boton="2">
+    <x-dashboard.filtro-card action="{{ route('admin.reportes.accesos.historico') }}" >
         <x-slot:campos>
 
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Desde</label>
-                    <input type="date" name="desde" class="form-control"
-                           value="{{ $desde }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Desde</label>
+                <input type="date" name="desde" class="form-control"
+                       value="{{ $desde }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
 
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Hasta</label>
-                    <input type="date" name="hasta" class="form-control"
-                           value="{{ $hasta }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Hasta</label>
+                <input type="date" name="hasta" class="form-control"
+                       value="{{ $hasta }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
 
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Locación</label>
-                    <select name="locacion_id" class="form-control">
-                        <option value="">Todas</option>
-                        @foreach($locaciones as $loc)
-                        <option value="{{ $loc->id }}" @selected($locacionId == $loc->id)>
-                            {{ $loc->nombre }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Locación</label>
+                <select name="locacion_id" class="form-control">
+                    <option value="">Todas</option>
+                    @foreach($locaciones as $loc)
+                    <option value="{{ $loc->id }}" @selected($locacionId == $loc->id)>
+                        {{ $loc->nombre }}
+                    </option>
+                    @endforeach
+                </select>
             </div>
 
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>Estado</label>
-                    <select name="estado" class="form-control">
-                        <option value="">Todos</option>
-                        <option value="en_curso"   @selected($estado === 'en_curso')>En curso</option>
-                        <option value="completado" @selected($estado === 'completado')>Completado</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Estado</label>
+                <select name="estado" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="en_curso"   @selected($estado === 'en_curso')>En curso</option>
+                    <option value="completado" @selected($estado === 'completado')>Completado</option>
+                </select>
             </div>
 
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>Buscar persona</label>
-                    <input type="text" name="buscar" class="form-control"
-                           placeholder="Nombre o documento"
-                           value="{{ $buscar }}"
-                           maxlength="100">
-                </div>
+            <div class="form-group">
+                <label>Buscar persona</label>
+                <input type="text" name="buscar" class="form-control"
+                       placeholder="Nombre o documento"
+                       value="{{ $buscar }}"
+                       maxlength="100">
             </div>
 
         </x-slot:campos>
@@ -139,61 +129,61 @@
 
     {{-- ── Tabla histórico ─────────────────────────── --}}
     <x-admin.data-table
-        icon="fas fa-history"
         title="Accesos del período"
         :count="$accesos->total()"
+        responsive
     >
         <x-slot:tools>
-            <div class="d-flex justify-content-end gap-1">
+            <div class="d-inline-flex gap-1">
                 <a href="{{ route('admin.reportes.export.historico.csv', request()->query()) }}"
-                   class="btn btn-sm btn-success export-btn" data-turbo="false">
+                   class="btn btn-sm btn-success export-btn">
                     <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                 </a>
                 <a href="{{ route('admin.reportes.export.historico.pdf', request()->query()) }}"
-                   class="btn btn-sm btn-danger export-btn" data-turbo="false">
+                   class="btn btn-sm btn-danger export-btn">
                     <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                 </a>
             </div>
         </x-slot:tools>
 
         <x-slot:footer>
-            {{ $accesos->links() }}
+            {{ $accesos->links('vendor.pagination.custom') }}
         </x-slot:footer>
 
         <thead class="table-light">
         <tr>
             <th>Persona</th>
-            <th>Documento</th>
-            <th>Actividad</th>
-            <th>Locación</th>
-            <th>Ingreso</th>
-            <th>Salida</th>
-            <th>Duración</th>
-            <th>Método</th>
+            <th class="d-none d-md-table-cell">Documento</th>
+            <th class="d-none d-lg-table-cell">Actividad</th>
+            <th class="d-none d-lg-table-cell">Locación</th>
+            <th class="d-none d-md-table-cell">Ingreso</th>
+            <th class="d-none d-lg-table-cell">Salida</th>
+            <th class="d-none d-lg-table-cell">Duración</th>
+            <th class="d-none d-md-table-cell">Método</th>
             <th>Estado</th>
         </tr>
         </thead>
         <tbody>
         @forelse($accesos as $acceso)
-        <tr>
-            <td>
+        <tr class="{{ $acceso->estado === 'en_curso' ? 'row-en-curso' : '' }}">
+            <td data-label="Persona">
                 {{ $acceso->persona->primer_nombre }}
                 {{ $acceso->persona->primer_apellido }}
             </td>
-            <td>
+            <td class="d-none d-md-table-cell" data-label="Documento">
                 <small class="text-muted">{{ $acceso->persona->doc_identidad }}</small>
             </td>
-            <td>{{ $acceso->actividad->nombre }}</td>
-            <td>{{ $acceso->locacion->nombre }}</td>
-            <td>{{ $acceso->hora_ingreso?->format('d/m/Y H:i') }}</td>
-            <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
-            <td>{{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}</td>
-            <td>
+            <td class="d-none d-lg-table-cell" data-label="Actividad">{{ $acceso->actividad->nombre }}</td>
+            <td class="d-none d-lg-table-cell" data-label="Locación">{{ $acceso->locacion->nombre }}</td>
+            <td class="d-none d-md-table-cell" data-label="Ingreso">{{ $acceso->hora_ingreso?->format('d/m/Y H:i') }}</td>
+            <td class="d-none d-lg-table-cell" data-label="Salida">{{ $acceso->hora_salida ? $acceso->hora_salida->format('d/m/Y H:i') : 'Sin registro' }}</td>
+            <td class="d-none d-lg-table-cell" data-label="Duración">{{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}</td>
+            <td class="d-none d-md-table-cell" data-label="Método">
                 <span class="badge bg-secondary">
                     {{ ucfirst($acceso->metodo_acceso) }}
                 </span>
             </td>
-            <td>
+            <td data-label="Estado">
                 <span class="badge bg-{{ $acceso->estado === 'en_curso' ? 'success' : 'secondary' }}">
                     {{ $acceso->estado === 'en_curso' ? 'En curso' : 'Completado' }}
                 </span>

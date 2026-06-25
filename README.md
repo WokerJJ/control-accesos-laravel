@@ -15,10 +15,12 @@
 - [Pruebas y Calidad de Código](#-pruebas-y-calidad-de-código)
 - [Despliegue (Opcional)](#-despliegue-opcional)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Rutas de la API](#-rutas-de-la-api)
+- [Rutas de la Aplicación](#-rutas-de-la-aplicación)
 - [Exportaciones y Reportes](#-exportaciones-y-reportes)
-- [Panel de Administracion](#-panel-de-administracion)
+- [Panel de Administración](#-panel-de-administración)
 - [Modelo de Datos](#-modelo-de-datos)
+- [Flujo de Operación](#-flujo-de-operación)
+- [Capturas de Pantalla](#-capturas-de-pantalla)
 
 ---
 
@@ -32,6 +34,8 @@ El sistema permite a los administradores:
 - Generar reportes en PDF y Excel/CSV.
 - Evaluar el servicio mediante una calificación de 1 a 5 estrellas.
 - Administrar usuarios y roles en el panel de administración.
+- Configurar ajustes del perfil y cambiar contraseñas.
+- Cierre diario automático de accesos olvidados.
 
 ---
 
@@ -57,6 +61,13 @@ El sistema permite a los administradores:
 | **Chart.js** | ^4.5.1 | Gráficos y estadísticas |
 | **FullCalendar** | ^6.1.20 | Calendario de actividades |
 | **Font Awesome** | ^7.2.0 | Iconografía |
+
+### Herramientas de Desarrollo
+| Herramienta | Propósito |
+|------------|-----------|
+| **Laravel Pint** | Formateo automático del código |
+| **Laravel Debugbar** (dev) | Depuración visual en entorno local |
+| **PHPUnit** | Pruebas unitarias y de integración |
 
 ---
 
@@ -117,8 +128,7 @@ El archivo `docker-entrypoint.sh` ejecuta los siguientes pasos al iniciar el con
 1. **Crea el archivo `.env`** con las variables de entorno configuradas en `docker-compose.yml` (si no existe).
 2. **Genera `APP_KEY`** automáticamente.
 3. **Espera a que MySQL esté listo** antes de continuar.
-4. **Ejecuta `migrate:fresh`** para crear todas las tablas y poblar los datos de prueba (seeders).
-5. **Crea el symlink** de `storage:link` y limpia cachés.
+4. **Crea el symlink** de `storage:link` y limpia cachés.
 
 > ⚠️ **Importante:** El entrypoint ejecuta `migrate:fresh`, lo que **elimina y recrea** la base de datos en cada inicio. Esto es intencional para desarrollo. Si necesitas preservar datos, modifica el entrypoint.
 
@@ -167,6 +177,9 @@ docker compose exec app php artisan <comando>
 
 # Ejecutar una migración manual
 docker compose exec app php artisan migrate
+
+# Ejecutar una migración manual con datos de prueba
+docker compose exec app php artisan migrate:fresh --seed
 
 # Acceder al contenedor de la app
 docker compose exec app bash
@@ -235,6 +248,8 @@ docker compose up -d --build
 
 > **Nota:** El puerto `3306` dentro del contenedor de MySQL **no se cambia**. Solo se modifica el mapeo externo (`HOST:CONTAINER`).
 
+---
+
 ## 🧪 Pruebas y Calidad de Código
 
 | Herramienta | Propósito |
@@ -265,78 +280,192 @@ Para entornos de producción puedes considerar:
 
 El proyecto sigue la convención de Laravel, organizada en directorios lógicos:
 
-### 📁 `app/`
-- **Http/Controllers/**:
-- **Admin/**: controladores del panel administrativo (`UsuarioController`, `ActividadController`, `AccesoController`, etc.).
-- **Models/**: cada entidad del dominio (ej. `Acceso.php`, `Actividad.php`, `Persona.php`, `Usuario.php`).
-- **Services/**: lógica de negocio segmentada (`AccesoService.php`, `CalificacionService.php`, `IngresoService.php`, etc.).
-- **Providers/AppServiceProvider.php**: registro de servicios y eventos.
+### 📁 `app/Http/Controllers/`
+
+**Controladores Públicos:**
+
+| Controlador | Descripción |
+|-------------|-------------|
+| `AccesoController` | Flujo de ingreso y identificación |
+| `ActividadController` | Selección y confirmación de actividades |
+| `CalificacionController` | Formulario y guardado de calificaciones |
+| `RegistroController` | Registro de nuevas personas |
+| `SalidaController` | Registro de salidas |
+
+**Controladores de Admin:**
+
+| Controlador | Descripción |
+|-------------|-------------|
+| `Admin/AccesoController` | Gestión de accesos en panel admin |
+| `Admin/ActividadController` | Programación y gestión de actividades |
+| `Admin/AjustesController` | Configuración de perfil y contraseña |
+| `Admin/AuthController` | Autenticación del panel admin |
+| `Admin/CasilleroController` | Gestión de casilleros |
+| `Admin/DashboardController` | Panel principal con estadísticas |
+| `Admin/UsuarioController` | CRUD de usuarios del sistema |
+| `Admin/Reportes/AccesoReporteController` | Generación de reportes PDF |
+| `Admin/Reportes/ExportController` | Exportación a CSV/PDF |
+
+### 📁 `app/Models/`
+
+| Modelo | Descripción |
+|--------|-------------|
+| `Acceso` | Registro central de entradas y salidas |
+| `AccesoOlvidado` | Accesos cerrados forzosamente por el sistema |
+| `Actividad` | Actividades disponibles para realizar |
+| `ActividadProgramada` | Actividades programadas por el admin |
+| `Calificacion` | Evaluaciones del servicio (1-5 estrellas) |
+| `Casillero` | Casilleros asignables durante el acceso |
+| `Departamento` | Divisiones geográficas departamentales |
+| `Locacion` | Instalaciones o sedes físicas |
+| `Municipio` | Municipios vinculados a departamentos |
+| `Persona` | Individuos registrados (visitantes, miembros, colaboradores) |
+| `Rol` | Roles de usuario para control de permisos |
+| `TipoActividad` | Categorías de actividad (instantánea, programable) |
+| `TipoIdentificacion` | Tipos de documento (CC, NIT, Pasaporte, etc.) |
+| `Usuario` | Cuentas de acceso al panel administrativo |
+
+### 📁 `app/Services/`
+
+**Servicios Públicos:**
+| Servicio | Descripción |
+|----------|-------------|
+| `AccesoService` | Lógica de accesos públicos |
+| `ActividadService` | Gestión de actividades |
+| `AuthService` | Autenticación personalizada |
+| `CalificacionService` | Lógica de calificaciones |
+| `CasilleroService` | Asignación de casilleros |
+| `EstadisticasService` | Estadísticas generales |
+| `IngresoService` | Flujo de ingreso |
+| `RegistroService` | Registro de personas |
+| `SalidaService` | Flujo de salida |
+
+**Servicios de Admin:**
+
+| Servicio | Descripción |
+|----------|-------------|
+| `Admin/AccesoAdminService` | Gestión de accesos en admin |
+| `Admin/AccesoEstadisticaService` | Estadísticas para dashboard |
+| `Admin/AccesoHistoricoService` | Histórico de accesos |
+| `Admin/AccesoReporteService` | Generación de reportes |
+| `Admin/UsuarioAdminService` | Gestión de usuarios |
+
+### 📁 `app/Repositories/`
+
+| Repositorio | Descripción |
+|-------------|-------------|
+| `AccesoRepository` | Interfaz de repositorio de accesos |
+| `Eloquent/AccesoRepository` | Implementación Eloquent |
+
+### 📁 `app/Exports/`
+
+| Exportación | Descripción |
+|-------------|-------------|
+| `ActividadesUsadasExport` | Exportación de actividades usadas |
+| `HistoricoAccesosExport` | Exportación de histórico de accesos |
+| `LocacionesOcupacionExport` | Exportación de ocupación por locación |
 
 ### 📁 `database/`
-- **migrations/**: archivos de migración para crear/aleterar tablas (`2026_04_29_*.php`).
+
+- **migrations/**: archivos de migración para crear/alterar tablas (`2026_04_29_*.php`).
 - **seeders/**: datos de prueba por tabla (`AccesoSeeder.php`, `UsuarioSeeder.php`, etc.).
 - **modelo.mwb**: modelo entidad‑relación creado en MySQL Workbench.
 
 ### 📁 `config/`
-- Archivos de configuración (`acceso.php`, `app.php`, `database.php`, `mail.php`, etc.) que permiten ajustar comportamientos sin tocar código.
+
+| Archivo | Descripción |
+|---------|-------------|
+| `acceso.php` | Configuración específica del sistema de accesos |
+| `app.php` | Configuración general de Laravel |
+| `auth.php` | Configuración de autenticación |
+| `database.php` | Configuración de base de datos |
+| `filesystems.php` | Configuración de sistemas de archivos |
+| `logging.php` | Configuración de logging |
+| `mail.php` | Configuración de correo |
+| `queue.php` | Configuración de colas |
+| `session.php` | Configuración de sesiones |
 
 ### 📁 `resources/`
-- **views/**: archivos Blade con la UI (`actividad`, `calificacion`, `ingreso`, `registro`, `salida`, `layouts`).
+
+- **views/**: archivos Blade con la UI (organizados por módulo).
 - **js/**: scripts frontend (`app.js`, `calendario.js`).
 - **css/**: estilos básicos y compilados por Tailwind/Vite.
 
-### 📁 `public/`
-- Archivos estáticos accesibles directamente (`index.php`, `favicon.ico`, etc.) y la carpeta de AdminLTE (`public/adminlte`).
-
 ### 📁 `routes/`
-- **web.php**: rutas web de la aplicación.
-- **console.php**: comandos Artisan personalizados.
 
-### 📁 Otros archivos clave
-- `.env`: variables de entorno esenciales.
-- `composer.json` / `package.json`: dependencias de PHP y Node.
-- `artisan`: CLI de Laravel.
-- `phpunit.xml`: configuración de pruebas.
+| Archivo | Descripción |
+|---------|-------------|
+| `web.php` | Rutas web de la aplicación |
+| `console.php` | Comandos Artisan programados |
 
 ---
 
-## 📡 Rutas de la API
+## 📡 Rutas de la Aplicación
 
 ### Rutas Públicas
 
 | Método | URI | Controlador | Descripción |
 |--------|-----|-------------|-------------|
 | GET | `/` | `AccesoController@index` | Página principal |
-| POST | `/ingreso/iniciar/{tipo}` | `AccesoController@iniciarFlujo` | Iniciar flujo de ingreso |
+| GET | `/ingreso/ingreso/{tipo}` | `AccesoController@iniciarFlujo` | Iniciar flujo de ingreso/salida |
 | GET | `/ingreso/identificar` | `AccesoController@identificar` | Formulario de identificación |
-| POST | `/ingreso/buscar` | `AccesoController@buscarUsuario` | Buscar por documento |
+| POST | `/ingreso/identificar` | `AccesoController@buscarUsuario` | Buscar por documento |
 | GET | `/ingreso/confirmacion` | `AccesoController@confirmacion` | Confirmar ingreso |
-| GET | `/actividad/index` | `ActividadController@index` | Seleccionar actividad |
-| POST | `/actividad/confirmar` | `ActividadController@confirmar` | Confirmar actividad |
-| GET | `/salida/index` | `SalidaController@index` | Vista de salida |
-| POST | `/salida/registrar` | `SalidaController@registrar` | Registrar salida |
-| GET | `/calificacion/index` | `CalificacionController@index` | Formulario calificación |
-| POST | `/calificacion/guardar` | `CalificacionController@guardar` | Guardar calificación |
-| GET | `/registro/create` | `RegistroController@create` | Formulario registro |
-| POST | `/registro/store` | `RegistroController@store` | Guardar registro |
+| GET | `/actividad/` | `ActividadController@index` | Seleccionar actividad |
+| POST | `/actividad/` | `ActividadController@confirmarActividad` | Confirmar actividad |
+| GET | `/salida/` | `SalidaController@index` | Vista de salida |
+| POST | `/salida/` | `SalidaController@registrar` | Registrar salida |
+| GET | `/calificacion/` | `CalificacionController@index` | Formulario calificación |
+| POST | `/calificacion/` | `CalificacionController@guardar` | Guardar calificación |
+| GET | `/registro/` | `RegistroController@create` | Formulario registro |
+| POST | `/registro/` | `RegistroController@store` | Guardar registro |
 
-### Rutas de Admin
+### Rutas de Admin (Autenticación)
 
 | Método | URI | Controlador | Descripción |
 |--------|-----|-------------|-------------|
 | GET | `/admin/login` | `AuthController@index` | Login admin |
 | POST | `/admin/login` | `AuthController@login` | Procesar login |
 | POST | `/admin/logout` | `AuthController@logout` | Cerrar sesión |
-| GET | `/admin/dashboard` | `DashboardController@index` | Dashboard |
+
+### Rutas de Admin (Protegidas - Middleware: `auth.dashboard`, `rol:1`)
+
+| Método | URI | Controlador | Descripción |
+|--------|-----|-------------|-------------|
+| GET | `/admin/dashboard` | `DashboardController@index` | Dashboard principal |
+| GET | `/admin/accesos` | `AdminAccesoController@index` | Lista accesos |
+| GET | `/admin/accesos/{acceso}` | `AdminAccesoController@show` | Detalle acceso |
 | GET | `/admin/usuarios` | `UsuarioController@index` | Lista usuarios |
 | GET | `/admin/usuarios/{id}` | `UsuarioController@show` | Detalle usuario |
 | PUT | `/admin/usuarios/{id}` | `UsuarioController@update` | Actualizar usuario |
-| GET | `/admin/actividades` | `ActividadController@index` | Gestión actividades |
-| POST | `/admin/actividades/programar` | `ActividadController@programar` | Programar actividad |
-| PUT | `/admin/actividades/actualizar` | `ActividadController@actualizar` | Actualizar actividad |
-| DELETE | `/admin/actividades/eliminar` | `ActividadController@eliminar` | Cancelar actividad |
-| GET | `/admin/accesos` | `AccesoController@index` | Lista accesos |
-| GET | `/admin/accesos/{acceso}` | `AccesoController@show` | Detalle acceso |
+| GET | `/admin/casilleros` | `CasilleroController@index` | Gestión casilleros |
+| GET | `/admin/actividades/` | `AdminActividadController@index` | Lista actividades |
+| POST | `/admin/actividades/` | `AdminActividadController@programar` | Programar actividad |
+| PUT | `/admin/actividades/{actividad}` | `AdminActividadController@actualizar` | Actualizar actividad |
+| DELETE | `/admin/actividades/{actividad}` | `AdminActividadController@eliminar` | Eliminar actividad |
+| GET | `/admin/ajustes/` | `AjustesController@index` | Configuración perfil |
+| PUT | `/admin/ajustes/` | `AjustesController@actualizar` | Actualizar perfil |
+| PUT | `/admin/ajustes/password` | `AjustesController@cambiarPassword` | Cambiar contraseña |
+
+### Rutas de Reportes (Admin Protegido)
+
+| Método | URI | Controlador | Descripción |
+|--------|-----|-------------|-------------|
+| GET | `/admin/reportes/accesos/resumen` | `AccesoReporteController@resumen` | Reporte resumen |
+| GET | `/admin/reportes/accesos/flujo` | `AccesoReporteController@flujo` | Flujo de accesos |
+| GET | `/admin/reportes/accesos/historico` | `AccesoReporteController@historico` | Histórico de accesos |
+| GET | `/admin/reportes/locaciones/ocupacion` | `AccesoReporteController@locacionesOcupacion` | Ocupación locaciones |
+| GET | `/admin/reportes/actividades/usadas` | `AccesoReporteController@actividadesUsadas` | Actividades usadas |
+
+### Rutas de Exportación (Admin Protegido)
+
+| Método | URI | Controlador | Descripción |
+|--------|-----|-------------|-------------|
+| GET | `/admin/reportes/export/historico/csv` | `ExportController@historicoCsv` | Exportar histórico CSV |
+| GET | `/admin/reportes/export/historico/pdf` | `ExportController@historicoPdf` | Exportar histórico PDF |
+| GET | `/admin/reportes/export/actividades/csv` | `ExportController@actividadesCsv` | Exportar actividades CSV |
+| GET | `/admin/reportes/export/locaciones/csv` | `ExportController@locacionesCsv` | Exportar locaciones CSV |
+| GET | `/admin/reportes/export/locaciones/pdf` | `ExportController@locacionesPdf` | Exportar locaciones PDF |
 
 ---
 
@@ -344,15 +473,20 @@ El proyecto sigue la convención de Laravel, organizada en directorios lógicos:
 
 | Tipo | Ruta | Controlador | Descripción |
 |------|------|-------------|-------------|
-| PDF | `/admin/reportes/resumen` | `AccesoReporteController@resumen` | Reporte resumen con KPIs |
-| PDF | `/admin/reportes/flujo` | `AccesoReporteController@flujo` | Flujo de accesos por hora |
-| CSV/Excel | `/admin/reportes/actividades` | `AccesoReporteController@actividadesUsadas` | Ranking de actividades usadas |
-| CSV/Excel | `/admin/reportes/historico` | `AccesoReporteController@historico` | Historico de accesos filtrable |
-| PDF | `/admin/reportes/locaciones` | `AccesoReporteController@locacionesOcupacion` | Ocupación por locación |
+| PDF | `/admin/reportes/accesos/resumen` | `AccesoReporteController@resumen` | Reporte resumen con KPIs |
+| PDF | `/admin/reportes/accesos/flujo` | `AccesoReporteController@flujo` | Flujo de accesos por hora |
+| PDF | `/admin/reportes/accesos/historico` | `AccesoReporteController@historico` | Histórico de accesos |
+| CSV/Excel | `/admin/reportes/actividades/usadas` | `AccesoReporteController@actividadesUsadas` | Ranking de actividades usadas |
+| PDF | `/admin/reportes/locaciones/ocupacion` | `AccesoReporteController@locacionesOcupacion` | Ocupación por locación |
+| CSV | `/admin/reportes/export/historico/csv` | `ExportController@historicoCsv` | Exportar histórico a CSV |
+| PDF | `/admin/reportes/export/historico/pdf` | `ExportController@historicoPdf` | Exportar histórico a PDF |
+| CSV | `/admin/reportes/export/actividades/csv` | `ExportController@actividadesCsv` | Exportar actividades a CSV |
+| CSV | `/admin/reportes/export/locaciones/csv` | `ExportController@locacionesCsv` | Exportar locaciones a CSV |
+| PDF | `/admin/reportes/export/locaciones/pdf` | `ExportController@locacionesPdf` | Exportar locaciones a PDF |
 
 ---
 
-## 👑 Panel de Administracion
+## 👑 Panel de Administración
 
 ### Acceso
 - **URL**: `/admin/login`
@@ -361,28 +495,21 @@ El proyecto sigue la convención de Laravel, organizada en directorios lógicos:
 
 ### Secciones
 | Sección | Descripción |
-|--------|-------------|
-| **Dashboard** | Estadisticas en tiempo real y accesos activos |
+|---------|-------------|
+| **Dashboard** | Estadísticas en tiempo real y accesos activos |
 | **Usuarios** | CRUD de usuarios del sistema administrativo |
-| **Actividades** | Programacion con calendario (FullCalendar) |
+| **Actividades** | Programación con calendario (FullCalendar) |
 | **Accesos** | Vista general con filtros por estado y fecha |
-| **Casilleros** | Gestion de casilleros disponibles |
-| **Reportes** | Resumen, flujo, historico, actividades, ocupacion |
-| **Exportar** | Exportacion a PDF y Excel/CSV |
-| **Ajustes** | Configuracion de perfil y cambio de contrasena |
-
-### Rutas de Admin (ejemplos)
-- GET `/admin/dashboard`
-- GET `/admin/usuarios`
-- POST `/admin/actividades/programar`
-- DELETE `/admin/actividades/eliminar`
-- GET `/admin/accesos`
+| **Casilleros** | Gestión de casilleros disponibles |
+| **Reportes** | Resumen, flujo, histórico, actividades, ocupación |
+| **Exportar** | Exportación a PDF y Excel/CSV |
+| **Ajustes** | Configuración de perfil y cambio de contraseña |
 
 ---
 
 ## 🗄️ Modelo de Datos
 
-El sistema cuenta con **15 tablas** en la base de datos:
+El sistema cuenta con **14 entidades** en la base de datos:
 
 | Entidad | Descripción |
 |---------|-------------|
@@ -395,12 +522,35 @@ El sistema cuenta con **15 tablas** en la base de datos:
 | **locacion** | Instalaciones o sedes físicas |
 | **tipos_actividad** | Categorías de actividad (instantánea, programable) |
 | **actividades** | Actividades disponibles para realizar |
+| **actividades_programadas** | Actividades programadas por el admin |
 | **casilleros** | Casilleros asignables durante el acceso |
 | **accesos** | Registro central de entradas y salidas |
 | **accesos_olvidados** | Accesos cerrados forzosamente por el sistema |
 | **calificaciones** | Evaluaciones del servicio (1-5 estrellas) |
-| **sessions** | Almacenamiento de sesiones |
+| **sessions** | Almacenamiento de sesiones de usuario |
 | **cache** | Caché de la aplicación |
+
+> **Nota:** Las tablas `sessions` y `cache` son tablas de sistema de Laravel y no forman parte del dominio de la aplicación.
+
+---
+
+## ⏰ Tareas Programadas
+
+El sistema ejecuta automáticamente tareas programadas mediante Laravel Scheduler:
+
+| Comando | Horario | Descripción |
+|---------|---------|-------------|
+| `accesos:cierre-diario` | Diario a las 00:00 | Cierra forzosamente los accesos que no fueron cerrados manualmente |
+
+---
+
+## 🔐 Middleware
+
+| Middleware | Descripción |
+|-----------|-------------|
+| `auth.dashboard` | Verifica que el usuario esté autenticado en el panel admin |
+| `rol:1` | Verifica que el usuario tenga el rol de administrador |
+| `VerificarCierreDiario` | Verifica si el cierre diario ya fue ejecutado |
 
 ---
 
@@ -422,40 +572,38 @@ INICIO >> IDENTIFICAR >> ACTIVIDAD >> CASILLERO >> CONFIRMAR >> SALIDA >> CALIFI
 
 ### 🖼️ Capturas de Pantalla
 
-#### 🏠 Página Principal
+#### Página Principal
 ![Pantalla principal](public/img/pantallaPrincipal.png)
 
-#### 🔑 Identificación
+#### Identificación
 ![Formulario de identificación por documento](public/img/formularioIdentificacion.png)
 
-#### 📋 Seleccion de Actividad
+#### Selección de Actividad
 ![Selección de actividad](public/img/seleccionActividades.png)
 
-#### ✅ Confirmacion de Ingreso
+#### Confirmación de Ingreso
 ![Resumen de ingreso con casillero asignado](public/img/confirmacionCasillero.png)
 
-#### 🚪 Registro de Salida
-![Pantalla de salida con duracion calculada](public/img/registroSalida.png)
+#### Registro de Salida
+![Pantalla de salida con duración calculada](public/img/registroSalida.png)
 
-#### ⭐ Calificacion
-![Formulario de calificacion del servicio](public/img/calificacion.png)
-
-#### 👑 Panel de Administracion
+#### Calificación
+![Formulario de calificación del servicio](public/img/calificacion.png)
 
 ##### Dashboard
-![Dashboard con estadisticas y graficos Chart.js](public/img/dashboard.png)
+![Dashboard con estadísticas y gráficos Chart.js](public/img/dashboard.png)
 
-##### Gestion de Usuarios
+##### Gestión de Usuarios
 ![Lista de usuarios del sistema](public/img/usuarios.png)
 
-##### Programacion de Actividades
+##### Programación de Actividades
 ![Calendario FullCalendar con actividades](public/img/actividades.png)
 
 ##### Reportes - Resumen
-![Reporte resumen con KPIS](public/img/reporteResumen.png)
+![Reporte resumen con KPIs](public/img/reportesResumen.png)
 
-##### Reportes - Historico
-![Reporte historico de accesos con filtros](public/img/reportesHistorialAccesos.png)
+##### Reportes - Histórico
+![Reporte histórico de accesos con filtros](public/img/reportesHistorialAccesos.png)
 
-##### Exportacion PDF
-![Ejemplo de reporte exportado a PDF](public/img/reportesResumen.png)
+##### Exportación PDF
+![Ejemplo de reporte exportado a PDF](public/img/exportacionpdf.png)

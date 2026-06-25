@@ -5,32 +5,31 @@
     <div class="sidebar-brand">
         <a href="{{ route('admin.dashboard') }}"
            class="brand-link">
-            <i class="fas fa-book-open brand-image opacity-75 ms-3 me-2"></i>
-            <span class="brand-text fw-light">
+            <i class="fas fa-shield-halved brand-image opacity-80"></i>
+            <span class="brand-text fw-bold">
                 Control Accesos
             </span>
         </a>
     </div>
     <div class="sidebar-wrapper">
         {{-- Usuario --}}
-        <div class="px-3 py-3 border-bottom border-secondary">
-            <div class="d-flex align-items-center">
+        <div class="user-panel">
+            <div class="d-flex align-items-center px-3 py-2">
                 @php
                     $u = Auth::user()->persona;
                     $iniciales = strtoupper(substr($u->primer_nombre ?? 'X', 0, 1) . substr($u->primer_apellido ?? 'X', 0, 1));
                 @endphp
-                <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
-                     style="width:38px;height:38px;background:linear-gradient(135deg,#0d6efd,#6610f2);font-size:14px;font-weight:700;color:#fff;letter-spacing:1px;">
+                <div class="img-circle elevation-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:35px;height:35px;background:linear-gradient(135deg,#4f46e5,#7c3aed);font-size:13px;font-weight:700;color:#fff;">
                     {{ $iniciales }}
                 </div>
-                <div class="ms-2 overflow-hidden">
-                    <div class="text-white small fw-semibold text-truncate">
-                        {{ Auth::user()->persona->primer_nombre }}
-                        {{ Auth::user()->persona->primer_apellido }}
-                    </div>
-                    <span class="badge text-bg-light text-dark mt-1" style="font-size:.65rem;">
+                <div class="info ms-2 overflow-hidden">
+                    <p class="text-white mb-0 text-truncate" style="font-size:0.875rem;line-height:1.4;">
+                        {{ Auth::user()->persona->primer_nombre }} {{ Auth::user()->persona->primer_apellido }}
+                    </p>
+                    <small class="d-block text-truncate" style="color:rgba(255,255,255,0.55);font-size:0.72rem;">
                         {{ Auth::user()->rol->nombre }}
-                    </span>
+                    </small>
                 </div>
             </div>
         </div>

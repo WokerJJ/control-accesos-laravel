@@ -126,7 +126,8 @@ class AccesoReporteService
                 'accesos.estado',
             ])
             ->with([
-                'persona:id,primer_nombre,primer_apellido,doc_identidad',
+                'persona:id,primer_nombre,primer_apellido,doc_identidad,programa_academico_id',
+                'persona.programaAcademico:id,nombre,tipo',
                 'locacion:id,nombre',
                 'actividad:id,nombre',
             ])

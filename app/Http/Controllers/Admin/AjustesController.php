@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AjustesController extends Controller
@@ -33,9 +34,11 @@ class AjustesController extends Controller
 
     public function actualizar(Request $request): RedirectResponse
     {
+        $persona = Auth::user()->persona;
+
         $request->validate([
-            'email'        => 'nullable|email|max:150',
-            'celular'      => 'nullable|string|max:20',
+            'email'        => ['nullable', 'email', 'max:150', Rule::unique('personas', 'email')->ignore($persona->id)],
+            'celular'      => 'nullable|string|max:15|regex:/^[0-9]+$/',
             'direccion'    => 'nullable|string|max:200',
             'municipio_id' => 'nullable|exists:municipio,id',
         ]);

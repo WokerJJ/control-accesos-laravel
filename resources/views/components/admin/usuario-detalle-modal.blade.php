@@ -1,4 +1,4 @@
-@props(['roles', 'municipios'])
+@props(['roles', 'departamentos'])
 
 {{-- Modal detalle --}}
 <div class="modal fade" id="usuarioDetalleModal" tabindex="-1">
@@ -21,7 +21,8 @@
 </div>
 
 {{-- Modal editar --}}
-<div class="modal fade" id="editarModal" tabindex="-1">
+<div class="modal fade" id="editarModal" tabindex="-1"
+     data-departamentos="{{ json_encode($departamentos->mapWithKeys(fn($d) => [$d->id => $d->municipios->map(fn($m) => ['id'=>$m->id,'nombre'=>$m->nombre])->values()])) }}">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -39,21 +40,29 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Celular</label>
-                        <input type="text" id="edit_celular" class="form-control" placeholder="3001234567">
+                        <input type="tel" id="edit_celular" class="form-control" placeholder="3001234567"
+                               maxlength="15" inputmode="numeric" pattern="[0-9]*"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Dirección</label>
                         <input type="text" id="edit_direccion" class="form-control" placeholder="Calle 123 # 45-67">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Municipio</label>
-                        <select id="edit_municipio_id" class="form-control">
-                            <option value="">— Sin municipio —</option>
-                            @foreach($municipios as $municipio)
-                            <option value="{{ $municipio->id }}">
-                                {{ $municipio->nombre }} — {{ $municipio->departamento->nombre }}
+                    <div class="col-md-3">
+                        <label class="form-label">Departamento</label>
+                        <select id="edit_departamento_id" class="form-control">
+                            <option value="">— Sin departamento —</option>
+                            @foreach($departamentos as $departamento)
+                            <option value="{{ $departamento->id }}">
+                                {{ $departamento->nombre }}
                             </option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Municipio</label>
+                        <select id="edit_municipio_id" class="form-control" disabled>
+                            <option value="">— Selecciona un municipio —</option>
                         </select>
                     </div>
                     <div class="col-md-3">

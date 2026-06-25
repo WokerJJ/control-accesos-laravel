@@ -1,13 +1,10 @@
 import Chart from 'chart.js/auto';
-import * as Turbo from '@hotwired/turbo';
-window.Turbo = Turbo;
-window.turbo = Turbo;
 
 // ═══════════════════════════════════════════════
-// Chart initialization (Turbo-compatible)
+// Chart initialization
 // ═══════════════════════════════════════════════
 
-function initTurboCharts() {
+function initCharts() {
   document.querySelectorAll('canvas[data-chart-config]').forEach((canvas) => {
     try {
       const cfg = JSON.parse(canvas.dataset.chartConfig);
@@ -19,8 +16,7 @@ function initTurboCharts() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initTurboCharts);
-document.addEventListener('turbo:load', initTurboCharts);
+document.addEventListener('DOMContentLoaded', initCharts);
 
 // ═══════════════════════════════════════════════
 // Global Chart reference
@@ -29,7 +25,7 @@ document.addEventListener('turbo:load', initTurboCharts);
 window.Chart = Chart;
 
 // ═══════════════════════════════════════════════
-// Calendar lazy loading (Turbo-compatible)
+// Calendar lazy loading
 // ═══════════════════════════════════════════════
 
 let calendarioModule = null;
@@ -49,8 +45,6 @@ async function loadCalendar() {
 }
 
 document.addEventListener('DOMContentLoaded', loadCalendar);
-document.addEventListener('turbo:load', loadCalendar);
-document.addEventListener('turbo:frame-load', loadCalendar);
 
 // ═══════════════════════════════════════════════
 // Bootstrap Modal accessibility fix (aria-hidden)
@@ -197,24 +191,28 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   e.preventDefault();
   _fillEditarForm({
-    id:           btn.dataset.id,
-    email:        btn.dataset.email        ?? '',
-    celular:      btn.dataset.celular      ?? '',
-    direccion:    btn.dataset.direccion    ?? '',
-    municipio_id: btn.dataset.municipioId  ?? '',
-    rol_id:       btn.dataset.rolId        ?? '',
-    estado:       btn.dataset.estado       ?? 'activo',
+    id:              btn.dataset.id,
+    email:           btn.dataset.email           ?? '',
+    celular:         btn.dataset.celular         ?? '',
+    direccion:       btn.dataset.direccion       ?? '',
+    departamento_id: btn.dataset.departamentoId  ?? '',
+    municipio_id:    btn.dataset.municipioId     ?? '',
+    rol_id:          btn.dataset.rolId           ?? '',
+    estado:          btn.dataset.estado          ?? 'activo',
   });
 });
 
 function _fillEditarForm(datos) {
   _editarId = datos.id;
-  document.getElementById('edit_email').value        = datos.email;
-  document.getElementById('edit_celular').value      = datos.celular;
-  document.getElementById('edit_direccion').value    = datos.direccion;
-  document.getElementById('edit_municipio_id').value = datos.municipio_id;
-  document.getElementById('edit_rol_id').value       = datos.rol_id;
-  document.getElementById('edit_estado').value       = datos.estado;
+  document.getElementById('edit_email').value           = datos.email;
+  document.getElementById('edit_celular').value         = datos.celular;
+  document.getElementById('edit_direccion').value       = datos.direccion;
+  document.getElementById('edit_departamento_id').value = datos.departamento_id || '';
+  document.getElementById('edit_rol_id').value          = datos.rol_id;
+  document.getElementById('edit_estado').value          = datos.estado;
+
+  // Cascade: populate municipios for selected departamento, then set municipio_id
+  _cascadaDeptoMunicipio(datos.departamento_id || '', datos.municipio_id || '');
 
   const detalleModalEl = document.getElementById('usuarioDetalleModal');
   const editarModalEl  = document.getElementById('editarModal');
@@ -249,8 +247,8 @@ document.addEventListener('click', (e) => {
     .then(data => {
       _fillEditarForm({
         id: data.usuario_id, email: data.email, celular: data.celular,
-        direccion: data.direccion, municipio_id: data.municipio_id,
-        rol_id: data.rol_id, estado: data.estado
+        direccion: data.direccion, departamento_id: data.departamento_id,
+        municipio_id: data.municipio_id, rol_id: data.rol_id, estado: data.estado
       });
       // Show modal after form is filled
       document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
@@ -316,6 +314,42 @@ document.addEventListener('click', (e) => {
       btn.innerHTML = textoOriginal;
     });
 });
+
+function _cascadaDeptoMunicipio(deptoId, seleccionarMunicipioId) {
+  const selectDepto = document.getElementById('edit_departamento_id');
+  const selectMuni  = document.getElementById('edit_municipio_id');
+  if (!selectDepto || !selectMuni) return;
+
+  const editarModal = document.getElementById('editarModal');
+  const departamentos = JSON.parse(editarModal?.dataset?.departamentos || '{}');
+  const municipios = departamentos[deptoId] ?? [];
+
+  selectMuni.innerHTML = '<option value="">— Selecciona un municipio —</option>';
+  if (!municipios.length) {
+    selectMuni.disabled = true;
+    selectMuni.value = '';
+    return;
+  }
+  municipios.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.nombre;
+    if (m.id == seleccionarMunicipioId) opt.selected = true;
+    selectMuni.appendChild(opt);
+  });
+  selectMuni.disabled = false;
+}
+
+function _initEditarCascade() {
+  const selectDepto = document.getElementById('edit_departamento_id');
+  if (!selectDepto || selectDepto._cascadeInit) return;
+  selectDepto._cascadeInit = true;
+  selectDepto.addEventListener('change', function () {
+    _cascadaDeptoMunicipio(this.value, null);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', _initEditarCascade);
 
 function _mostrarToast(mensaje, tipo = 'success') {
   const toast = document.createElement('div');
@@ -468,9 +502,9 @@ function initReloj() {
 }
 
 // ═══════════════════════════════════════════════
-// Re-initialize page-specific functionality after Turbo navigation
+// Initialize page-specific functionality
 // ═══════════════════════════════════════════════
-document.addEventListener('turbo:load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   initAjustesCascade();
   initActividadesData();
   initLoginPasswordToggle();
@@ -478,46 +512,10 @@ document.addEventListener('turbo:load', () => {
   initReloj();
 });
 
-// ═══════════════════════════════════════════════
-// Turbo cleanup: dispose modals + abort pending fetches
-// ═══════════════════════════════════════════════
-document.addEventListener('turbo:before-render', () => {
-  // Abort any in-flight fetch
-  if (_modalFetchCtrl) { _modalFetchCtrl.abort(); _modalFetchCtrl = null; }
 
-  // Dispose all active Bootstrap modal instances + remove backdrops
-  document.querySelectorAll('.modal.show').forEach(modalEl => {
-    const instance = bootstrap.Modal.getInstance(modalEl);
-    if (instance) instance.dispose();
-  });
-  document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-  document.body.classList.remove('modal-open');
-  document.body.style.removeProperty('padding-right');
 
-  // Cleanup FullCalendar
-  calendarioModule?.destroyCalendar?.();
-});
 
-// ═══════════════════════════════════════════════
-// AdminLTE sidebar — Turbo-compatible re-init
-// AdminLTE's PushMenu only initializes on DOMContentLoaded, but
-// Turbo replaces the DOM on navigation, killing the listeners.
-// We re-create PushMenu after each Turbo load.
-// ═══════════════════════════════════════════════
-function initSidebar() {
-  if (typeof AdminLTE === 'undefined' || !AdminLTE.PushMenu) return;
-  const el = document.querySelector('.app-sidebar');
-  if (!el) return;
-  // First load: AdminLTE already created an instance via DOMContentLoaded — skip
-  if (typeof document.body._pushMenu === 'undefined') {
-    document.body._pushMenu = true; // mark as initialized by AdminLTE
-    return;
-  }
-  // Subsequent Turbo loads: re-create PushMenu with new DOM elements
-  document.body._pushMenu = new AdminLTE.PushMenu(el);
-}
 
-document.addEventListener('turbo:load', initSidebar);
 
 // ═══════════════════════════════════════════════
 // Character counters for inputs with maxlength
@@ -539,6 +537,7 @@ document.addEventListener('input', (e) => {
 function initCharCounters() {
   document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach((el) => {
     if (el.closest('.input-group')) return; // skip input-group (login, etc.)
+    if (el.closest('.filtro-card')) return; // skip filter forms (alignment would break)
     if (el.parentElement.querySelector('.char-counter')) return; // already initialized
     const max = parseInt(el.getAttribute('maxlength'));
     const len = el.value.length;
@@ -553,104 +552,66 @@ function initCharCounters() {
 }
 
 document.addEventListener('DOMContentLoaded', initCharCounters);
-document.addEventListener('turbo:load', initCharCounters);
-document.addEventListener('turbo:frame-load', initCharCounters);
 
-// ═══════════════════════════════════════════════
-// Card collapse — capture-phase delegation (attaches once, never duplicated)
-// Intercepts BEFORE AdminLTE's per-element handler to prevent # in URL.
-// ═══════════════════════════════════════════════
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-lte-toggle="card-collapse"]');
-  if (!btn) return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  const card = btn.closest('.card');
-  if (!card) return;
-  if (btn._animating) return;
-  btn._animating = true;
-  const L = 'collapsed-card';
-  const body = card.querySelector(':scope > .card-body, :scope > .card-footer');
-  const icon = btn.querySelector('i');
-  const cleanup = () => {
-    btn._animating = false;
-    body.style.removeProperty('height');
-    body.style.removeProperty('overflow');
-    body.style.removeProperty('transition');
-  };
-
-  if (card.classList.contains(L)) {
-    // Expand
-    card.classList.remove(L);
-    card.classList.remove('was-collapsed');
-    if (body) {
-      body.style.removeProperty('display');
-      body.offsetHeight;
-      body.style.overflow = 'hidden';
-      const targetH = body.scrollHeight;
-      body.style.height = '0';
-      body.offsetHeight;
-      body.style.transition = 'height 0.3s ease';
-      body.style.height = targetH + 'px';
-      body.addEventListener('transitionend', cleanup, { once: true });
-    }
-    if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
-  } else {
-    // Collapse
-    card.classList.add(L);
-    if (body) {
-      body.style.overflow = 'hidden';
-      body.style.height = body.scrollHeight + 'px';
-      body.offsetHeight;
-      body.style.transition = 'height 0.3s ease';
-      body.style.height = '0';
-      body.addEventListener('transitionend', () => {
-        body.style.display = 'none';
-        cleanup();
-      }, { once: true });
-    }
-    if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus'); }
-  }
-}, { capture: true });
-
-// Treeview accordion — handles PARENT and child items with href="#" in sidebar
-// After Turbo navigation, AdminLTE's own treeview handler is gone, so this
-// prevents the # from being added to the URL and toggles the submenu.
-document.addEventListener('click', (e) => {
-  const link = e.target.closest('.sidebar-menu .nav-link[href="#"]');
-  if (!link) return;
-  e.preventDefault();
-  const li = link.closest('.nav-item');
-  if (!li) return;
-  li.classList.toggle('menu-open');
-  const treeview = li.querySelector(':scope > .nav-treeview');
-  if (treeview) {
-    treeview.style.display = li.classList.contains('menu-open') ? 'block' : 'none';
-  }
-});
 
 // ═══════════════════════════════════════════════
 // Export buttons loading state
-// Shows spinner + disables button while download starts
+// Shows spinner + toast + disables button while download starts
+// Resets on page visibility change (user returns from download dialog)
 // ═══════════════════════════════════════════════
+let _exportResetTimer = null;
+
+function _resetExportBtn(btn) {
+  if (!btn || btn._resetDone) return;
+  btn._resetDone = true;
+  btn.classList.remove('disabled');
+  btn.removeAttribute('aria-disabled');
+  btn.style.pointerEvents = '';
+  const sp = btn.querySelector('.spinner-border');
+  if (sp) sp.remove();
+  const textEl = btn.querySelector('.btn-text');
+  if (textEl) textEl.textContent = btn.dataset.originalText || 'Descargar';
+  if (_exportResetTimer) { clearTimeout(_exportResetTimer); _exportResetTimer = null; }
+}
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.export-btn');
   if (!btn) return;
+
+  // Determine file type from button text or icon
   const textEl = btn.querySelector('.btn-text');
-  if (textEl) btn.dataset.originalText = textEl.textContent;
+  const label = textEl?.textContent || '';
+  const isPdf = label.includes('PDF') || btn.querySelector('.fa-file-pdf');
+  const isExcel = label.includes('Excel') || btn.querySelector('.fa-file-excel');
+  const formatLabel = isPdf ? 'PDF' : isExcel ? 'Excel' : 'archivo';
+
+  if (textEl) btn.dataset.originalText = label;
+  btn._resetDone = false;
   btn.classList.add('disabled');
   btn.setAttribute('aria-disabled', 'true');
-  if (textEl) textEl.textContent = 'Descargando...';
+  btn.style.pointerEvents = 'none';
+  if (textEl) textEl.textContent = 'Generando ' + formatLabel + '...';
+
   const spinner = document.createElement('span');
   spinner.className = 'spinner-border spinner-border-sm me-1';
   spinner.setAttribute('role', 'status');
   btn.prepend(spinner);
-  // Re-enable after 8s as safety net
-  setTimeout(() => {
-    btn.classList.remove('disabled');
-    btn.removeAttribute('aria-disabled');
-    const sp = btn.querySelector('.spinner-border');
-    if (sp) sp.remove();
-    if (textEl) textEl.textContent = btn.dataset.originalText || 'Descargar';
-  }, 8000);
+
+  // Toast notification
+  _mostrarToast('Generando ' + formatLabel + ', espera un momento...', 'info');
+
+  // Reset on visibility change (user returns from browser save dialog)
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') {
+      _resetExportBtn(btn);
+      document.removeEventListener('visibilitychange', onVisible);
+    }
+  };
+  document.addEventListener('visibilitychange', onVisible);
+
+  // Safety net: re-enable after 15s (PDF generation can be slow)
+  _exportResetTimer = setTimeout(() => {
+    _resetExportBtn(btn);
+    document.removeEventListener('visibilitychange', onVisible);
+  }, 15000);
 });

@@ -37,40 +37,64 @@ class ExportController extends Controller
     public function historicoPdf(Request $request)
     {
         $params  = $this->params($request);
-        $accesos = Acceso::query()
-            ->select([
-                'id', 'persona_id', 'locacion_id', 'actividad_id',
-                'estado', 'hora_ingreso', 'hora_salida', 'duracion'
-            ])
-            ->with([
-                'persona:id,primer_nombre,primer_apellido,doc_identidad',
-                'locacion:id,nombre',
-                'actividad:id,nombre',
-            ])
+        $baseQuery = Acceso::query()
             ->where('hora_ingreso', '>=', $params['desde'] . ' 00:00:00')
             ->where('hora_ingreso', '<=', $params['hasta'] . ' 23:59:59')
             ->when($params['locacionId'], fn($q) => $q->where('locacion_id', $params['locacionId']))
             ->when($params['estado'],     fn($q) => $q->where('estado', $params['estado']))
-            ->orderByDesc('hora_ingreso')
-            ->get();
+            ->when($params['buscar'], function ($q) use ($params) {
+                $q->whereHas('persona', function ($q) use ($params) {
+                    $q->where('doc_identidad',   'like', "%{$params['buscar']}%")
+                        ->orWhere('primer_nombre', 'like', "%{$params['buscar']}%")
+                        ->orWhere('primer_apellido', 'like', "%{$params['buscar']}%");
+                });
+            });
 
-        if ($accesos->count() > 1000) {
-            return back()->with('error', 'El rango es demasiado grande para PDF.');
+        $totalRegistros = $baseQuery->clone()->count();
+
+        if ($totalRegistros > 1000) {
+            return back()->with('mensaje', [
+                'tipo'  => 'danger',
+                'texto' => 'El rango seleccionado contiene ' . number_format($totalRegistros) . ' registros. '
+                         . 'El límite para exportar a PDF es de 1,000 registros. '
+                         . 'Intente reducir el rango de fechas o use los filtros para afinar la búsqueda.',
+            ]);
         }
 
-        $locacion = $params['locacionId']
-            ? Locacion::find($params['locacionId'])?->nombre
-            : null;
+        try {
+            $accesos = $baseQuery
+                ->select([
+                    'id', 'persona_id', 'locacion_id', 'actividad_id',
+                    'estado', 'hora_ingreso', 'hora_salida', 'duracion'
+                ])
+                ->with([
+                    'persona:id,primer_nombre,primer_apellido,doc_identidad',
+                    'locacion:id,nombre',
+                    'actividad:id,nombre',
+                ])
+                ->orderByDesc('hora_ingreso')
+                ->get();
 
-        $pdf = Pdf::loadView('exports.historico-pdf', [
-            'accesos'  => $accesos,
-            'kpis'     => $this->historico->kpisPeriodo($params['desde'], $params['hasta'], $params['locacionId']),
-            'desde'    => $params['desde'],
-            'hasta'    => $params['hasta'],
-            'locacion' => $locacion,
-        ])->setPaper('a4', 'landscape');
+            $locacion = $params['locacionId']
+                ? Locacion::find($params['locacionId'])?->nombre
+                : null;
 
-        return $pdf->download('historico_' . $params['desde'] . '_' . $params['hasta'] . '.pdf');
+            $pdf = Pdf::loadView('exports.historico-pdf', [
+                'accesos'  => $accesos,
+                'kpis'     => $this->historico->kpisPeriodo($params['desde'], $params['hasta'], $params['locacionId']),
+                'desde'    => $params['desde'],
+                'hasta'    => $params['hasta'],
+                'locacion' => $locacion,
+            ])->setPaper('a4', 'landscape');
+
+            return $pdf->download('historico_' . $params['desde'] . '_' . $params['hasta'] . '.pdf');
+        } catch (\Throwable $e) {
+            return back()->with('mensaje', [
+                'tipo'  => 'danger',
+                'texto' => 'Error al generar el PDF con ' . number_format($totalRegistros) . ' registros. '
+                         . 'Intente reducir el rango de fechas o exportar a Excel en su lugar.',
+            ]);
+        }
     }
 
     // ── Actividades más usadas ─────────────────────

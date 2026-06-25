@@ -165,18 +165,18 @@
 
     {{-- ── Tabla últimos accesos ────────────────────── --}}
     <x-admin.data-table
-        icon="fas fa-list"
         title="Últimos accesos del día"
+        responsive
     >
     <thead class="table-light">
     <tr>
         <th>Persona</th>
-        <th>Documento</th>
-        <th>Actividad</th>
-        <th>Locación</th>
-        <th>Ingreso</th>
-        <th>Salida</th>
-        <th>Duración</th>
+        <th class="d-none d-md-table-cell">Documento</th>
+        <th class="d-none d-lg-table-cell">Actividad</th>
+        <th class="d-none d-lg-table-cell">Locación</th>
+        <th class="d-none d-md-table-cell">Ingreso</th>
+        <th class="d-none d-lg-table-cell">Salida</th>
+        <th class="d-none d-lg-table-cell">Duración</th>
         <th>Estado</th>
     </tr>
     </thead>
@@ -187,16 +187,16 @@
             {{ $acceso->persona->primer_nombre }}
             {{ $acceso->persona->primer_apellido }}
         </td>
-        <td>
+        <td class="d-none d-md-table-cell">
             <small class="text-muted">
                 {{ $acceso->persona->doc_identidad }}
             </small>
         </td>
-        <td>{{ $acceso->actividad->nombre }}</td>
-        <td>{{ $acceso->locacion->nombre }}</td>
-        <td>{{ $acceso->hora_ingreso?->format('H:i') }}</td>
-        <td>{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
-        <td>
+        <td class="d-none d-lg-table-cell">{{ $acceso->actividad->nombre }}</td>
+        <td class="d-none d-lg-table-cell">{{ $acceso->locacion->nombre }}</td>
+        <td class="d-none d-md-table-cell">{{ $acceso->hora_ingreso?->format('H:i') }}</td>
+        <td class="d-none d-lg-table-cell">{{ $acceso->hora_salida?->format('H:i') ?? '—' }}</td>
+        <td class="d-none d-lg-table-cell">
             {{ $acceso->duracion ? $acceso->duracion . ' min' : '—' }}
         </td>
         <td>

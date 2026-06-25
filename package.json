@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "build:prod": "cross-env ASSET_URL=/control-accesos vite build",
     "dev": "vite",
     "copy-adminlte": "xcopy node_modules\\admin-lte\\dist public\\adminlte\\dist /E /I /Y",
     "copy-jquery": "xcopy node_modules\\jquery\\dist public\\adminlte\\plugins\\jquery /E /I /Y",
@@ -14,6 +15,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
     "concurrently": "^9.0.1",
+    "cross-env": "^10.1.0",
     "laravel-vite-plugin": "^3.0.0",
     "tailwindcss": "^4.0.0",
     "vite": "^8.0.0"
@@ -29,7 +31,6 @@
     "admin-lte": "^4.0.0-rc7",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
-    "jquery": "^4.0.0",
-    "@hotwired/turbo": "^8.0.23"
+    "jquery": "^4.0.0"
   }
 }

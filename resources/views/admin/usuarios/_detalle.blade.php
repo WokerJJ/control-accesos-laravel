@@ -1,6 +1,6 @@
 <div class="row g-3">
 
-    {{-- Estado badge --}}
+    {{-- Estado + registro --}}
     <div class="col-12 d-flex justify-content-between align-items-center">
         <span class="badge bg-{{ $usuario->estado === 'activo' ? 'success' : 'secondary' }} fs-6">
             <i class="fas fa-circle me-1" style="font-size:8px;"></i>
@@ -26,7 +26,7 @@
                     </div>
                     <div class="col-md-6">
                         <small class="text-muted d-block">Documento</small>
-                        <span>{{ $usuario->doc_identidad }}</span>
+                        <span>{{ $usuario->tipo_identificacion }} {{ $usuario->doc_identidad }}</span>
                     </div>
                     <div class="col-md-6">
                         <small class="text-muted d-block">Email</small>
@@ -36,6 +36,19 @@
                         <small class="text-muted d-block">Celular</small>
                         <span>{{ $usuario->celular ?? '—' }}</span>
                     </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Área</small>
+                        <span class="badge bg-{{ $usuario->area_color }}">{{ $usuario->area }}</span>
+                        @if($usuario->programa)
+                        <small class="d-block text-muted mt-1">{{ $usuario->programa }}</small>
+                        @endif
+                    </div>
+                    @if($usuario->codigo_institucional && $usuario->codigo_institucional !== 'EXTERNO')
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Código institucional</small>
+                        <span class="font-monospace">{{ $usuario->codigo_institucional }}</span>
+                    </div>
+                    @endif
                     <div class="col-md-6">
                         <small class="text-muted d-block">Municipio</small>
                         <span>{{ $usuario->municipio ?? '—' }}</span>
@@ -55,7 +68,7 @@
         </div>
     </div>
 
-    {{-- Rol y accesos --}}
+    {{-- Rol --}}
     <div class="col-md-6">
         <div class="card card-outline card-success mb-0 h-100">
             <div class="card-header py-2">
@@ -90,7 +103,7 @@
 
 </div>
 
-{{-- Botón editar al pie del detalle --}}
+{{-- Botón editar --}}
 <div class="mt-3 text-end">
     <button class="btn btn-primary btn-sm btn-editar"
             data-id="{{ $usuario->usuario_id }}"
@@ -98,6 +111,7 @@
             data-celular="{{ $usuario->celular }}"
             data-direccion="{{ $usuario->direccion }}"
             data-municipio-id="{{ $usuario->municipio_id }}"
+            data-departamento-id="{{ $usuario->departamento_id }}"
             data-rol-id="{{ $usuario->rol_id }}"
             data-estado="{{ $usuario->estado }}">
         <i class="fas fa-edit me-1"></i>Editar

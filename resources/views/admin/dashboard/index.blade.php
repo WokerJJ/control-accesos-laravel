@@ -11,9 +11,9 @@
 
 {{-- Estadísticas --}}
 <div class="row row-cols-1 row-cols-md-3 g-3">
-    <x-dashboard.stat-box color="text-bg-primary" :value="$stats['total_usuarios']" label="Usuarios registrados" icon="fas fa-users" url="hola"/>
-    <x-dashboard.stat-box color="text-bg-success" :value="$stats['accesos_hoy']" label="Accesos hoy" icon="fas fa-calendar-day" url="hola"/>
-    <x-dashboard.stat-box color="text-bg-info" :value="$stats['accesos_mes']" label="Accesos mes" icon="fas fa-chart-line" url="hola"/>
+    <x-dashboard.stat-box color="text-bg-primary" :value="$stats['total_usuarios']" label="Usuarios registrados" icon="fas fa-users" url="{{ route('admin.usuarios.index') }}"/>
+    <x-dashboard.stat-box color="text-bg-success" :value="$stats['accesos_hoy']" label="Accesos hoy" icon="fas fa-calendar-day" url="{{ route('admin.accesos.index') }}"/>
+    <x-dashboard.stat-box color="text-bg-info" :value="$stats['accesos_mes']" label="Accesos mes" icon="fas fa-chart-line" url="{{ route('admin.accesos.index') }}"/>
 </div>
 
 <div class="row mb-4">

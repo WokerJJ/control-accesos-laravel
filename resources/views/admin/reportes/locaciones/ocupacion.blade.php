@@ -13,23 +13,19 @@
 <div class="container-fluid">
 
     {{-- ── Filtros ──────────────────────────────────── --}}
-    <x-dashboard.filtro-card action="{{ route('admin.reportes.locaciones.ocupacion') }}" col-boton="2">
+    <x-dashboard.filtro-card action="{{ route('admin.reportes.locaciones.ocupacion') }}" >
         <x-slot:campos>
-            <div class="col-md-5">
-                <div class="form-group">
-                    <label>Desde</label>
-                    <input type="date" name="desde" class="form-control"
-                           value="{{ $desde }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Desde</label>
+                <input type="date" name="desde" class="form-control"
+                       value="{{ $desde }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
-            <div class="col-md-5">
-                <div class="form-group">
-                    <label>Hasta</label>
-                    <input type="date" name="hasta" class="form-control"
-                           value="{{ $hasta }}"
-                           max="{{ now('America/Bogota')->toDateString() }}">
-                </div>
+            <div class="form-group">
+                <label>Hasta</label>
+                <input type="date" name="hasta" class="form-control"
+                       value="{{ $hasta }}"
+                       max="{{ now('America/Bogota')->toDateString() }}">
             </div>
         </x-slot:campos>
     </x-dashboard.filtro-card>
@@ -123,18 +119,18 @@
         {{-- Ranking tabla --}}
         <div class="col-md-8">
             <x-admin.data-table
-                icon="fas fa-map-marker-alt"
                 title="Ranking de locaciones"
                 full-height
+                responsive
             >
                 <x-slot:tools>
                     <div class="d-flex gap-1">
                         <a href="{{ route('admin.reportes.export.locaciones.csv', request()->query()) }}"
-                           class="btn btn-sm btn-success export-btn" data-turbo="false">
+                           class="btn btn-sm btn-success export-btn">
                             <i class="fas fa-file-excel mr-1"></i><span class="btn-text">Excel</span>
                         </a>
                         <a href="{{ route('admin.reportes.export.locaciones.pdf', request()->query()) }}"
-                           class="btn btn-sm btn-danger export-btn" data-turbo="false">
+                           class="btn btn-sm btn-danger export-btn">
                             <i class="fas fa-file-pdf mr-1"></i><span class="btn-text">PDF</span>
                         </a>
                     </div>
@@ -145,11 +141,11 @@
                     <th>#</th>
                     <th>Locación</th>
                     <th class="text-end">Accesos</th>
-                    <th class="text-end">En curso</th>
-                    <th>Participación</th>
-                    <th>Días activa</th>
-                    <th>Prom.</th>
-                    <th>Últ. acceso</th>
+                    <th class="text-end d-none d-md-table-cell">En curso</th>
+                    <th class="d-none d-lg-table-cell">Participación</th>
+                    <th class="d-none d-lg-table-cell">Días activa</th>
+                    <th class="d-none d-md-table-cell">Prom.</th>
+                    <th class="d-none d-md-table-cell">Últ. acceso</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -170,14 +166,14 @@
                     <td class="text-end">
                         <span class="badge bg-primary">{{ $loc->total_accesos }}</span>
                     </td>
-                    <td class="text-end">
+                    <td class="text-end d-none d-md-table-cell">
                         @if($loc->en_curso > 0)
                         <span class="badge bg-success">{{ $loc->en_curso }}</span>
                         @else
                         <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td style="min-width:130px;">
+                    <td class="d-none d-lg-table-cell" style="min-width:130px;">
                         <div class="d-flex align-items-center gap-1">
                             <div class="progress flex-grow-1" style="height:6px;">
                                 <div class="progress-bar bg-primary"
@@ -186,13 +182,13 @@
                             <small class="text-muted">{{ $loc->porcentaje }}%</small>
                         </div>
                     </td>
-                    <td>
+                    <td class="d-none d-lg-table-cell">
                         <small class="text-muted">{{ $loc->dias_activa }} días</small>
                     </td>
-                    <td>
+                    <td class="d-none d-md-table-cell">
                         <small class="text-muted">{{ $loc->duracion_promedio }}</small>
                     </td>
-                    <td>
+                    <td class="d-none d-md-table-cell">
                         <small class="text-muted">{{ $loc->ultimo_acceso }}</small>
                     </td>
                 </tr>
